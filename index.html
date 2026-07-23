@@ -573,6 +573,33 @@
       user-select: none;
     }
 
+    .base-filter-intro {
+      grid-column: 1 / -1;
+      margin: 0 0 2px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .base-filter-intro b { color: var(--ink); }
+
+    .current-model-rule {
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      min-width: 0;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .current-model-rule small { color: var(--muted); font-size: 9px; font-weight: 800; }
+    .current-model-rule strong { color: var(--ink); font-size: 11px; line-height: 1.35; }
+    .current-model-rule a { color: #354bc1; font-size: 9px; font-weight: 800; }
+
     .base-filters select,
     .regional-controls select {
       width: 100%;
@@ -1030,7 +1057,59 @@
     .control-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
     .control-head label { color: var(--muted); font-size: 11px; }
     .control-head output { color: var(--ink); font-size: 13px; font-weight: 900; }
+    .control select {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 11px;
+    }
     input[type="range"] { width: 100%; accent-color: var(--blue); }
+
+    .calc-group-title {
+      margin: 0 0 14px;
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .calc-group-title:not(:first-child) {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .details-block {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #f8fafc;
+    }
+
+    .details-block > summary {
+      padding: 14px 16px;
+      cursor: pointer;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+      list-style-position: inside;
+    }
+
+    .details-block > summary span {
+      margin-left: 6px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .details-block[open] > summary { border-bottom: 1px solid var(--line); }
+    .details-content { padding: 16px; }
+    .details-content > :first-child { margin-top: 0; }
 
     .evidence {
       display: grid;
@@ -1458,17 +1537,15 @@
       <div class="mobile-summary">Содержание · нажмите на раздел</div>
       <div class="toc-title">Как читать документ</div>
       <nav class="toc">
-        <a href="#decision" class="active"><span class="toc-num">01</span><span><b>Решение</b><span>Что меняем и чего не обещаем</span></span></a>
-        <a href="#base"><span class="toc-num">02</span><span><b>База сейчас</b><span>Клиенты, чеки, выручка, промо</span></span></a>
-        <a href="#cjm"><span class="toc-num">03</span><span><b>Путь клиента</b><span>Три способа обслуживания</span></span></a>
-        <a href="#regions"><span class="toc-num">04</span><span><b>Региональное правило</b><span>Кому нужен личный менеджер</span></span></a>
-        <a href="#capacity"><span class="toc-num">05</span><span><b>Нагрузка команды</b><span>Сколько разговоров реально покрыть</span></span></a>
-        <a href="#economics"><span class="toc-num">06</span><span><b>Команда и затраты</b><span>Люди, стоимость и варианты экономии</span></span></a>
-        <a href="#product"><span class="toc-num">07</span><span><b>Новый продукт</b><span>Отдельная команда · 4 ставки</span></span></a>
-        <a href="#pilot"><span class="toc-num">08</span><span><b>Пилот</b><span>Как доказать эффект без риска</span></span></a>
-        <a href="#sources"><span class="toc-num">09</span><span><b>Источники</b><span>Что подтверждено, что допущение</span></span></a>
+        <a href="#decision" class="active"><span class="toc-num">01</span><span><b>Суть решения</b><span>Что меняем и зачем</span></span></a>
+        <a href="#base"><span class="toc-num">02</span><span><b>Клиенты</b><span>Кого ведём потоком, кого лично</span></span></a>
+        <a href="#cjm"><span class="toc-num">03</span><span><b>Как это работает</b><span>Путь клиента и роль региона</span></span></a>
+        <a href="#capacity"><span class="toc-num">04</span><span><b>Один калькулятор</b><span>Все изменяемые параметры</span></span></a>
+        <a href="#economics"><span class="toc-num">05</span><span><b>Люди и деньги</b><span>FTE, затраты и новый продукт</span></span></a>
+        <a href="#pilot"><span class="toc-num">06</span><span><b>Проверка</b><span>Пилот без риска для выручки</span></span></a>
+        <a href="#sources"><span class="toc-num">07</span><span><b>Источники</b><span>Где факт, а где допущение</span></span></a>
       </nav>
-      <div class="sidebar-foot">Начните с разделов 01 и 03: там решение и простая схема. Остальные разделы объясняют расчёт, риски и источники.</div>
+      <div class="sidebar-foot">Для быстрого решения прочитайте 01 → 04 → 05 → 06. Подробные сравнения раскрываются только при необходимости.</div>
     </aside>
 
     <main>
@@ -1526,16 +1603,15 @@
         <div class="split">
           <div>
             <div class="base-filters">
+              <p class="base-filter-intro"><b>Как читать таблицу:</b> небольшой месячный чек — телефонная команда, крупный чек — личный менеджер. В регионах с падающей долей личное ведение начинается раньше. Саму границу по чеку меняем один раз — в общем калькуляторе ниже.</p>
               <label>Регион
                 <select id="baseRegionFilter" aria-label="Фильтр по региону"></select>
               </label>
-              <label>В регионе со стабильной долей личный менеджер ведёт клиента
-                <select id="baseThreshold" aria-label="Граница личного ведения в стабильном регионе">
-                  <option value="70000">если траты больше 70 тыс. ₽ в месяц</option>
-                  <option value="80000" selected>если траты больше 80 тыс. ₽ — базовый сценарий</option>
-                  <option value="100000">если траты больше 100 тыс. ₽ в месяц</option>
-                </select>
-              </label>
+              <div class="current-model-rule">
+                <small>Текущее правило распределения</small>
+                <strong id="baseThresholdSummary">Атака: лично после 50 тыс. ₽ · стабильные регионы: после 80 тыс. ₽</strong>
+                <a href="#capacity">Изменить в едином калькуляторе ↓</a>
+              </div>
             </div>
             <div class="base-legend" aria-label="Обозначения способов обслуживания">
               <span><i class="auto"></i>автоматические сообщения</span>
@@ -1632,7 +1708,7 @@
 
       <section class="section" id="regions">
         <div class="section-head">
-          <div class="section-no">04</div>
+          <div class="section-no">03</div>
           <div><h2>Кому оставляем личного менеджера в разных регионах</h2></div>
           <p>«Граница» — это месячные траты клиента, после которых он выходит из общей телефонной очереди и получает персонального владельца. В атаке это происходит раньше, поэтому личное ведение там плотнее.</p>
         </div>
@@ -1660,44 +1736,45 @@
             </div>
           </article>
         </div>
-        <div class="overlay-rule"><b>Почему абсолютные числа похожи:</b> база стабильных регионов в 2,3 раза больше. Сравнивать нужно долю: при базовом пороге лично ведём 28% клиентов в атаке против 16% в защите. Чтобы усилить атаку ещё сильнее, на пилоте проверяем не новый порог, а меньшие портфели и более частые встречи у S3/RSM/KAM.</div>
-        <div class="threshold-compare" aria-label="Сравнение границ личного ведения в регионах со стабильной долей">
-          <article class="threshold-card">
-            <small>Самая осторожная модель</small>
-            <h4>Личный менеджер после 70 тыс. ₽</h4>
-            <p>Меньше нагрузка на телефонную команду, но заметно больше клиентов и ставок требуется в личном ведении.</p>
-            <div class="threshold-metrics"><span><b id="th70Kc">5 256</b>КЦ</span><span><b id="th70Personal">1 485</b>лично</span><span><b id="th70Fte">39</b>ставок на базу</span></div>
-          </article>
-          <article class="threshold-card recommended">
-            <small>Базовый компромисс</small>
-            <h4>Личный менеджер после 80 тыс. ₽</h4>
-            <p>Снижает очередь телефонной команды относительно 100 тыс. ₽, но не так сильно увеличивает личный слой, как порог 70 тыс. ₽.</p>
-            <div class="threshold-metrics"><span><b id="th80Kc">5 391</b>КЦ</span><span><b id="th80Personal">1 350</b>лично</span><span><b id="th80Fte">37</b>ставок на базу</span></div>
-          </article>
-          <article class="threshold-card">
-            <small>Максимум потока</small>
-            <h4>Личный менеджер после 100 тыс. ₽</h4>
-            <p>Минимум личного ведения, но максимальная очередь КЦ. Используем как стресс-сценарий, а не как рекомендацию.</p>
-            <div class="threshold-metrics"><span><b id="th100Kc">5 570</b>КЦ</span><span><b id="th100Personal">1 171</b>лично</span><span><b id="th100Fte">36</b>ставок на базу</span></div>
-          </article>
-        </div>
+        <div class="overlay-rule"><b>Почему абсолютные числа похожи:</b> база стабильных регионов в 2,3 раза больше. Сравнивать нужно долю: при выбранном сейчас пороге лично ведём 28% клиентов в атаке против 16% в защите. Чтобы усилить атаку ещё сильнее, на пилоте проверяем не новый порог, а меньшие портфели и более частые встречи у S3/RSM/KAM.</div>
+        <details class="details-block">
+          <summary>Сравнить другие границы по чеку <span>70 / 80 / 100 тыс. ₽</span></summary>
+          <div class="details-content">
+            <div class="threshold-compare" aria-label="Сравнение границ личного ведения в регионах со стабильной долей">
+              <article class="threshold-card">
+                <small>Больше личного ведения</small>
+                <h4>Личный менеджер после 70 тыс. ₽</h4>
+                <p>Меньше нагрузка на телефонную команду, но заметно больше клиентов и ставок требуется в личном ведении.</p>
+                <div class="threshold-metrics"><span><b id="th70Kc">5 256</b>КЦ</span><span><b id="th70Personal">1 485</b>лично</span><span><b id="th70Fte">39</b>ставок на базу</span></div>
+              </article>
+              <article class="threshold-card recommended">
+                <small>Выбрано сейчас</small>
+                <h4>Личный менеджер после 80 тыс. ₽</h4>
+                <p>Снижает очередь телефонной команды относительно 100 тыс. ₽, но не так сильно увеличивает личный слой, как порог 70 тыс. ₽.</p>
+                <div class="threshold-metrics"><span><b id="th80Kc">5 391</b>КЦ</span><span><b id="th80Personal">1 350</b>лично</span><span><b id="th80Fte">37</b>ставок на базу</span></div>
+              </article>
+              <article class="threshold-card">
+                <small>Больше потока</small>
+                <h4>Личный менеджер после 100 тыс. ₽</h4>
+                <p>Минимум личного ведения, но максимальная очередь КЦ. Используем как стресс-сценарий, а не как рекомендацию.</p>
+                <div class="threshold-metrics"><span><b id="th100Kc">5 570</b>КЦ</span><span><b id="th100Personal">1 171</b>лично</span><span><b id="th100Fte">36</b>ставок на базу</span></div>
+              </article>
+            </div>
+          </div>
+        </details>
 
+        <details class="details-block">
+          <summary>Показать расчёт по каждому региону <span>фильтр, сортировка и ориентировочные ставки</span></summary>
+          <div class="details-content">
         <div class="regional-planning">
           <div class="regional-planning-head">
             <div>
               <h3>Где нужны ставки КЦ, а где — старшие роли</h3>
-              <p>Таблица переводит клиентскую базу каждого региона в ориентировочную нагрузку. Это распределение ставок общей команды, а не создание отдельного штата в каждом регионе.</p>
+              <p>Таблица использует параметры единого калькулятора ниже. Это распределение ставок общей команды, а не создание отдельного штата в каждом регионе.</p>
             </div>
             <div class="regional-controls">
               <label>Регион
                 <select id="regionFilter" aria-label="Фильтр региональной таблицы"></select>
-              </label>
-              <label>В стабильном регионе личный менеджер подключается
-                <select id="defenseThreshold" aria-label="Граница для стабильного региона">
-                  <option value="70000">после 70 тыс. ₽ в месяц</option>
-                  <option value="80000" selected>после 80 тыс. ₽ — базовый сценарий</option>
-                  <option value="100000">после 100 тыс. ₽ в месяц</option>
-                </select>
               </label>
               <label>Показать регионы в порядке
                 <select id="regionalSort">
@@ -1705,13 +1782,6 @@
                   <option value="kc">где больше нагрузка на телефонную команду</option>
                   <option value="personalSpend">где больше трат в личном ведении</option>
                   <option value="total">где больше клиентов всего</option>
-                </select>
-              </label>
-              <label>Насколько больше времени на личного клиента в атаке
-                <select id="attackIntensity">
-                  <option value="1">столько же, сколько в защите</option>
-                  <option value="1.25" selected>на 25% больше — базовый сценарий</option>
-                  <option value="1.5">на 50% больше</option>
                 </select>
               </label>
             </div>
@@ -1732,48 +1802,85 @@
           </div>
           <p class="regional-note">Расчётная единица: 265 клиентов на ставку КЦ, 100 клиентов личного слоя на S3 и 35 клиентов с тратами выше 300 тыс. ₽ на KAM/RSM. Для атаки выбранный коэффициент увеличивает расчётную долю старших ролей, потому что встречи и проработка должны быть плотнее. Это сценарий для пилота, а не утверждённый норматив.</p>
         </div>
+          </div>
+        </details>
       </section>
 
       <section class="section" id="capacity">
         <div class="section-head">
-          <div class="section-no">05</div>
-          <div><h2>Сколько КЦ действительно покроет</h2></div>
-          <p>Калькулятор различает попытку и живой контакт, а также заранее вычитает время на входящие обращения. Это критично: входящие нельзя считать «бесплатной» нагрузкой, а «позвонить всей базе» не равно «поговорить со всей базой».</p>
+          <div class="section-no">04</div>
+          <div><h2>Один калькулятор всей модели</h2></div>
+          <p>Здесь собраны все изменяемые параметры: граница по чеку, усиление атаки, мощность КЦ и размеры личных портфелей. Все цифры FTE и экономии ниже пересчитываются отсюда.</p>
         </div>
         <div class="calc">
           <div class="controls">
+            <p class="calc-group-title">1 · Кого ведём потоком, кого лично</p>
+            <div class="control">
+              <div class="control-head"><label for="baseThreshold">В стабильном регионе личный менеджер подключается</label></div>
+              <select id="baseThreshold" aria-label="Граница личного ведения в стабильном регионе">
+                <option value="70000">если месячные траты выше 70 тыс. ₽</option>
+                <option value="80000" selected>если месячные траты выше 80 тыс. ₽ — выбрано сейчас</option>
+                <option value="100000">если месячные траты выше 100 тыс. ₽</option>
+              </select>
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="attackIntensity">Сколько дополнительного времени даём личному клиенту в атаке</label></div>
+              <select id="attackIntensity">
+                <option value="1">столько же, сколько в стабильном регионе</option>
+                <option value="1.25" selected>на 25% больше — выбрано сейчас</option>
+                <option value="1.5">на 50% больше</option>
+              </select>
+            </div>
+
+            <p class="calc-group-title">2 · Какую частоту должна покрыть телефонная команда</p>
             <div class="control">
               <div class="control-head"><label for="fte">Сколько сотрудников работает в телефонной команде</label><output id="fteOut">20 ставок</output></div>
               <input id="fte" type="range" min="4" max="34" step="1" value="20">
             </div>
             <div class="control">
-              <div class="control-head"><label for="minutes">Сколько минут в день доступно на всю телефонную работу и оформление</label><output id="minutesOut">270 мин</output></div>
-              <input id="minutes" type="range" min="180" max="360" step="15" value="270">
-            </div>
-            <div class="control">
-              <div class="control-head"><label for="inbound">Из них сколько минут резервируем на входящие обращения</label><output id="inboundOut">30 мин</output></div>
-              <input id="inbound" type="range" min="0" max="120" step="15" value="30">
-            </div>
-            <div class="control">
-              <div class="control-head"><label for="cycle">Сколько занимает одна попытка: звонок, поиск информации и запись в CRM</label><output id="cycleOut">7,0 мин</output></div>
-              <input id="cycle" type="range" min="4" max="14" step=".5" value="7">
-            </div>
-            <div class="control">
-              <div class="control-head"><label for="connect">Какая доля попыток заканчивается разговором с клиентом</label><output id="connectOut">35%</output></div>
-              <input id="connect" type="range" min="15" max="70" step="5" value="35">
-            </div>
-            <div class="control">
               <div class="control-head"><label for="target">Сколько разговоров с каждым клиентом хотим проводить в месяц</label><output id="targetOut">1,0 раза</output></div>
               <input id="target" type="range" min=".25" max="2" step=".25" value="1">
             </div>
-            <div class="evidence">
-              <div><b>29–57%</b><span><strong>Доля разговора · 4 менеджера × 1 день</strong>Это диапазон выборки, а не норматив производительности.</span></div>
-              <div><b>≈43%</b><span><strong>Работа до и после звонка</strong>КП, аналитика, поиск информации, CRM и координация остаются вне разговора.</span></div>
-              <div><b>1–3 мин</b><span><strong>Поиск контекста клиента</strong>Наблюдаемый диапазон одного цикла Client 360.</span></div>
-              <div><b>5–15 мин</b><span><strong>Оффер / тариф при ручном сценарии</strong>Не каждый звонок, но это главный «тихий» расход времени.</span></div>
-              <div><b>174→82 с</b><span><strong>Предиктивная выборка</strong>Медиана разговора снизилась; это наблюдение одного менеджера за два дня, не причинный эффект.</span></div>
-              <div><b id="inboundEvidence">30 мин</b><span><strong>Резерв на входящие обращения</strong>Их наличие подтверждено, но объём не нормирован. 30 минут — редактируемое допущение для сценария, а не факт.</span></div>
-            </div>
+
+            <details class="details-block">
+              <summary>Точные параметры производительности <span>время, входящие, дозвон и личные портфели</span></summary>
+              <div class="details-content">
+                <div class="control">
+                  <div class="control-head"><label for="minutes">Сколько минут в день доступно на всю телефонную работу и оформление</label><output id="minutesOut">270 мин</output></div>
+                  <input id="minutes" type="range" min="180" max="360" step="15" value="270">
+                </div>
+                <div class="control">
+                  <div class="control-head"><label for="inbound">Из них сколько минут резервируем на входящие обращения</label><output id="inboundOut">30 мин</output></div>
+                  <input id="inbound" type="range" min="0" max="120" step="15" value="30">
+                </div>
+                <div class="control">
+                  <div class="control-head"><label for="cycle">Сколько занимает одна попытка: звонок, поиск информации и запись в CRM</label><output id="cycleOut">7,0 мин</output></div>
+                  <input id="cycle" type="range" min="4" max="14" step=".5" value="7">
+                </div>
+                <div class="control">
+                  <div class="control-head"><label for="connect">Какая доля попыток заканчивается разговором с клиентом</label><output id="connectOut">35%</output></div>
+                  <input id="connect" type="range" min="15" max="70" step="5" value="35">
+                </div>
+                <div class="control">
+                  <div class="control-head"><label for="s3Portfolio">Сколько клиентов может вести один S3</label><output id="s3PortfolioOut">100 клиентов</output></div>
+                  <input id="s3Portfolio" type="range" min="50" max="180" step="10" value="100">
+                  <p class="assumption-hint">Портфель должен помещать входящие и исходящие обращения, CRM и встречи.</p>
+                </div>
+                <div class="control">
+                  <div class="control-head"><label for="seniorPortfolio">Сколько клиентов &gt;300 тыс. ₽ может вести один KAM/RSM</label><output id="seniorPortfolioOut">35 клиентов</output></div>
+                  <input id="seniorPortfolio" type="range" min="20" max="70" step="5" value="35">
+                  <p class="assumption-hint">Личные встречи и сложные сделки могут заметно уменьшить реальный портфель.</p>
+                </div>
+                <div class="evidence">
+                  <div><b>29–57%</b><span><strong>Доля разговора · 4 менеджера × 1 день</strong>Диапазон выборки, а не норматив.</span></div>
+                  <div><b>≈43%</b><span><strong>Работа до и после звонка</strong>КП, поиск информации, CRM и координация.</span></div>
+                  <div><b>1–3 мин</b><span><strong>Поиск контекста клиента</strong>Наблюдаемый диапазон Client 360.</span></div>
+                  <div><b>5–15 мин</b><span><strong>Ручной оффер / тариф</strong>Главный скрытый расход времени.</span></div>
+                  <div><b>174→82 с</b><span><strong>Предиктивная выборка</strong>Наблюдение одного менеджера за два дня.</span></div>
+                  <div><b id="inboundEvidence">30 мин</b><span><strong>Резерв на входящие</strong>Редактируемое допущение, а не факт.</span></div>
+                </div>
+              </div>
+            </details>
           </div>
           <div>
             <div class="results">
@@ -1810,9 +1917,9 @@
 
       <section class="section" id="economics">
         <div class="section-head">
-          <div class="section-no">06</div>
+          <div class="section-no">05</div>
           <div><h2>Сколько людей нужно и сколько можно сэкономить</h2></div>
-          <p>Численность берём из уточнения команды, клиентов — из клиентской выгрузки, стоимость одной ставки — из витрины затрат по ролям. Это разные источники, поэтому мы не выдаём число закреплений за действующий штат.</p>
+          <p>Фактические 38 сотрудников и стоимость ролей взяты из источников. Все цифры «нужно», баланс ставок и сценарии экономии ниже автоматически зависят от единого калькулятора в разделе 04.</p>
         </div>
         <div class="cost-facts">
           <article class="cost-fact verified">
@@ -1856,22 +1963,12 @@
           </div>
 
           <div class="workforce-card">
-            <h3>Сколько сотрудников нужно при выбранном сценарии</h3>
-            <p>Это калькулятор, а не текущий штат. Он делит число клиентов на выбранную нагрузку одного сотрудника.</p>
+            <h3>Результат калькулятора: сколько сотрудников нужно</h3>
+            <p>Это не текущий штат и не готовый норматив. Если изменить параметры нагрузки выше, расчёт ставок здесь изменится автоматически.</p>
             <div class="calculation-scenario">
-              <small>Сейчас считаем</small>
+              <small>Берём из единого калькулятора в разделе 04</small>
               <strong id="workforceScenario">Стабильные регионы: личный менеджер подключается выше 80 тыс. ₽</strong>
-              <span>Телефонная команда: один живой контакт с каждым клиентом в месяц, время на входящие вычтено выше. Ниже можно менять непроверенные нормы личных портфелей.</span>
-            </div>
-            <div class="control">
-              <div class="control-head"><label for="s3Portfolio">Сколько клиентов может вести один S3</label><output id="s3PortfolioOut">100</output></div>
-              <input id="s3Portfolio" type="range" min="50" max="180" step="10" value="100">
-              <p class="assumption-hint">Рабочая гипотеза, которую нужно проверить на пилоте. Портфель должен помещать всю работу S3: входящие обращения, исходящие контакты, CRM и встречи.</p>
-            </div>
-            <div class="control">
-              <div class="control-head"><label for="seniorPortfolio">Сколько клиентов &gt;300 тыс. может вести один KAM/RSM</label><output id="seniorPortfolioOut">35</output></div>
-              <input id="seniorPortfolio" type="range" min="20" max="70" step="5" value="35">
-              <p class="assumption-hint">Тоже гипотеза: входящие обращения, личные встречи и сложные сделки могут заметно уменьшить реальный портфель.</p>
+              <span>На результат влияют порог по чеку, усиление атаки, число сотрудников КЦ, входящие, длительность цикла, дозвон, цель контактов и размеры портфелей старших ролей. Здесь показан только итог.</span>
             </div>
             <div class="role-head"><span>Кого обслуживаем</span><span>Нужно</span><span>Как посчитано</span></div>
             <div class="role-row"><span><b>S2 / телефонная команда</b><span id="kcQueueRole">5 391</span> клиент</span><output id="kcFteRole">23 ставки</output><span id="kcCapacityRule">≈240 клиентов на ставку</span></div>
@@ -1912,7 +2009,7 @@
 
       <section class="section" id="product">
         <div class="section-head">
-          <div class="section-no">07</div>
+          <div class="section-no">05</div>
           <div><h2>Продажи нового продукта — отдельная команда из 4 ставок</h2></div>
           <p>Команда получает переданную клиентскую базу из другого подразделения, где с этими клиентами уже работают. Это передача ответственности за продажу нового продукта, а не параллельное подключение второго продавца.</p>
         </div>
@@ -1928,7 +2025,7 @@
 
       <section class="section" id="pilot">
         <div class="section-head">
-          <div class="section-no">08</div>
+          <div class="section-no">06</div>
           <div><h2>Пилот вместо резкого изменения штата</h2></div>
           <p>Шесть недель достаточно, чтобы проверить реальную нагрузку команды и ранние сигналы риска. Выручку сравниваем с похожей группой клиентов, для которой модель не меняли.</p>
         </div>
@@ -1948,7 +2045,7 @@
 
       <section class="section" id="sources">
         <div class="section-head">
-          <div class="section-no">09</div>
+          <div class="section-no">07</div>
           <div><h2>Откуда взялись цифры</h2></div>
           <p>Каждый источник отвечает только на свой вопрос. Здесь указано, что именно он доказывает, чего не доказывает и почему использован.</p>
         </div>
@@ -2018,7 +2115,6 @@
     const baseRegionFilter = document.getElementById('baseRegionFilter');
     const regionFilter = document.getElementById('regionFilter');
     const baseThreshold = document.getElementById('baseThreshold');
-    const defenseThreshold = document.getElementById('defenseThreshold');
     const regionalSort = document.getElementById('regionalSort');
     const attackIntensity = document.getElementById('attackIntensity');
 
@@ -2180,6 +2276,11 @@
       setText('heroQueue', fmt0.format(all.kc));
       setText('heroPersonal', fmt0.format(all.personal));
       setText('heroThreshold', fmt0.format(threshold / 1000));
+      setText(
+        'baseThresholdSummary',
+        'Атака: лично после 50 тыс. ₽ · стабильные регионы: после ' +
+        fmt0.format(threshold / 1000) + ' тыс. ₽'
+      );
       setText('decisionQueue', fmt0.format(all.kc));
       setText('decisionPersonal', fmt0.format(all.personal));
       setText('decisionShare', fmt1.format(personalShare) + '%');
@@ -2236,17 +2337,14 @@
       [baseRegionFilter, regionFilter].filter(Boolean).forEach((select) => {
         select.addEventListener('change', () => {
           syncSelects(select, select === baseRegionFilter ? regionFilter : baseRegionFilter);
-          const threshold = Number(baseThreshold?.value || defenseThreshold?.value || 80000);
+          const threshold = Number(baseThreshold?.value || 80000);
           renderBaseTable(threshold);
           renderRegionalPlanning(threshold);
         });
       });
 
-      [baseThreshold, defenseThreshold].filter(Boolean).forEach((select) => {
-        select.addEventListener('change', () => {
-          syncSelects(select, select === baseThreshold ? defenseThreshold : baseThreshold);
-          updateGlobalThreshold(Number(select.value));
-        });
+      baseThreshold?.addEventListener('change', () => {
+        updateGlobalThreshold(Number(baseThreshold.value));
       });
 
       regionalSort?.addEventListener('change', () => {
