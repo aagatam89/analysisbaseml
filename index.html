@@ -1,0 +1,2497 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RRE · модель покрытия M / L · 5 команд</title>
+  <style>
+    :root {
+      --ink: #101828;
+      --muted: #596579;
+      --line: #dce3ec;
+      --paper: #f4f7fb;
+      --card: rgba(255,255,255,.94);
+      --navy: #16233d;
+      --navy-2: #202f4f;
+      --mint: #37e1b2;
+      --mint-soft: #daf9ef;
+      --blue: #5d77ff;
+      --blue-soft: #e8ecff;
+      --coral: #ff765f;
+      --coral-soft: #ffebe7;
+      --gold: #ffc65c;
+      --gold-soft: #fff4d9;
+      --violet: #9b7cff;
+      --shadow: 0 18px 55px rgba(20,35,65,.10);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 78% -10%, rgba(93,119,255,.16), transparent 30rem),
+        radial-gradient(circle at 15% 20%, rgba(55,225,178,.11), transparent 28rem),
+        var(--paper);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    a { color: inherit; }
+    button, input { font: inherit; }
+    section { scroll-margin-top: 20px; }
+
+    .shell {
+      width: min(1480px, calc(100% - 32px));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 278px minmax(0, 1fr);
+      gap: 24px;
+      padding: 24px 0 56px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      align-self: start;
+      height: calc(100vh - 36px);
+      min-height: 680px;
+      overflow: auto;
+      padding: 24px 18px;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(55,225,178,.17), transparent 16rem),
+        linear-gradient(160deg, #15213a, #0e1728);
+      color: #fff;
+      box-shadow: 0 24px 70px rgba(13,23,43,.22);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 19px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: var(--mint);
+      color: #0c2c26;
+      font-weight: 900;
+      letter-spacing: -.04em;
+    }
+
+    .brand b { display: block; font-size: 15px; }
+    .brand span { display: block; color: #aebbd0; font-size: 11px; margin-top: 2px; }
+
+    .threshold {
+      padding: 15px;
+      margin: 0 0 16px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+    }
+
+    .threshold small {
+      display: block;
+      color: var(--mint);
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .threshold strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 23px;
+      letter-spacing: -.03em;
+    }
+
+    .threshold p {
+      margin: 6px 0 0;
+      color: #bdc8da;
+      font-size: 12px;
+    }
+
+    .toc-title {
+      margin: 18px 8px 8px;
+      color: #8190a8;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .toc {
+      display: grid;
+      gap: 5px;
+    }
+
+    .toc a {
+      position: relative;
+      display: grid;
+      grid-template-columns: 27px 1fr;
+      gap: 8px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      color: #dfe6f2;
+      text-decoration: none;
+      transition: .18s ease;
+    }
+
+    .toc a:hover,
+    .toc a.active {
+      background: rgba(255,255,255,.09);
+      color: #fff;
+      transform: translateX(2px);
+    }
+
+    .toc a.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      bottom: 11px;
+      width: 3px;
+      border-radius: 3px;
+      background: var(--mint);
+    }
+
+    .toc-num {
+      color: var(--mint);
+      font-size: 10px;
+      font-weight: 900;
+      padding-top: 2px;
+    }
+
+    .toc b { display: block; font-size: 12px; line-height: 1.25; }
+    .toc span { display: block; color: #93a1b6; font-size: 10px; margin-top: 3px; line-height: 1.3; }
+
+    .sidebar-foot {
+      margin: 17px 8px 0;
+      color: #8390a6;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    main { min-width: 0; }
+
+    .hero {
+      position: relative;
+      min-height: 460px;
+      overflow: hidden;
+      padding: clamp(28px, 5vw, 62px);
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at 95% 10%, rgba(93,119,255,.52), transparent 24rem),
+        radial-gradient(circle at 76% 90%, rgba(55,225,178,.26), transparent 20rem),
+        linear-gradient(135deg, #15223c 0%, #1a2948 72%, #152238 100%);
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      right: -180px;
+      bottom: -230px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 50%;
+      box-shadow: 0 0 0 46px rgba(255,255,255,.025), 0 0 0 92px rgba(255,255,255,.02);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 14px;
+      color: var(--mint);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 26px;
+      height: 2px;
+      background: currentColor;
+    }
+
+    .hero h1 {
+      max-width: 870px;
+      margin: 0;
+      font-size: clamp(36px, 5.5vw, 72px);
+      line-height: .98;
+      letter-spacing: -.055em;
+    }
+
+    .hero h1 span { color: var(--mint); }
+
+    .hero-lead {
+      max-width: 810px;
+      margin: 22px 0 0;
+      color: #d8e0ed;
+      font-size: clamp(15px, 1.6vw, 20px);
+      line-height: 1.5;
+    }
+
+    .hero-stats {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 36px;
+    }
+
+    .hero-stat {
+      min-height: 108px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 19px;
+      background: rgba(255,255,255,.07);
+      backdrop-filter: blur(9px);
+    }
+
+    .hero-stat strong {
+      display: block;
+      font-size: clamp(24px, 2.8vw, 38px);
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    .hero-stat span { display: block; margin-top: 9px; color: #bfc9da; font-size: 12px; }
+    .hero-stat.accent strong { color: var(--mint); }
+    .hero-stat .hero-pair {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .hero-stat .hero-pair span {
+      display: inline;
+      margin: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+    .hero-stat .hero-pair i {
+      color: #fff;
+      font-style: normal;
+      opacity: .82;
+    }
+    .hero-stat .hero-pair-label { display: block; }
+    .hero-stat .hero-pair-label .inline-number {
+      display: inline;
+      margin: 0;
+      color: inherit;
+      font-size: inherit;
+      font-weight: 900;
+    }
+
+    .section {
+      margin-top: 24px;
+      padding: clamp(24px, 3.4vw, 42px);
+      border: 1px solid rgba(214,223,235,.86);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) minmax(220px, 380px);
+      align-items: start;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .section-no {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: var(--navy);
+      color: var(--mint);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(26px, 3vw, 42px);
+      line-height: 1.05;
+      letter-spacing: -.04em;
+    }
+
+    .section-head p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .decision-strip {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+    }
+
+    .decision {
+      min-height: 190px;
+      padding: 22px;
+      border-right: 1px solid var(--line);
+    }
+
+    .decision:last-child { border-right: 0; }
+    .decision.primary { background: var(--mint-soft); }
+    .decision.risk { background: var(--coral-soft); }
+
+    .decision small {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .decision strong {
+      display: block;
+      margin-top: 9px;
+      font-size: 25px;
+      line-height: 1.12;
+      letter-spacing: -.035em;
+    }
+
+    .decision p { margin: 11px 0 0; color: var(--muted); font-size: 13px; }
+
+    .guardrail {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+      margin-top: 18px;
+      padding: 15px 17px;
+      border-radius: 17px;
+      background: #fff6f3;
+      color: #6d2c22;
+    }
+
+    .guardrail b:first-child {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--coral);
+      color: #fff;
+    }
+
+    .guardrail strong { display: block; font-size: 13px; }
+    .guardrail span { display: block; margin-top: 3px; font-size: 12px; }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(260px, .55fr);
+      gap: 20px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      font-size: 12px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .data-table th:first-child,
+    .data-table td:first-child { text-align: left; }
+    .data-table tr:last-child td { border-bottom: 0; }
+    .data-table th { color: var(--muted); background: #f7f9fc; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+    .base-table-wrap { width: 100%; overflow-x: auto; border-radius: 18px; }
+    .base-table { min-width: 700px; table-layout: fixed; }
+    .base-table th,
+    .base-table td { padding: 11px 8px; }
+    .base-table th { white-space: normal; line-height: 1.25; }
+    .base-table th:first-child { width: 19%; }
+    .base-table th:nth-child(2) { width: 10%; }
+    .base-table th:nth-child(3) { width: 13%; }
+    .base-table th:nth-child(4) { width: 10%; }
+    .base-table th:nth-child(5),
+    .base-table th:nth-child(6),
+    .base-table th:nth-child(7) { width: 16%; }
+    .base-route-value {
+      display: inline-flex;
+      min-width: 44px;
+      justify-content: center;
+      padding: 4px 7px;
+      border-radius: 999px;
+      color: var(--ink);
+      font-weight: 900;
+    }
+    .base-route-value.auto { background: var(--gold-soft); }
+    .base-route-value.kc { background: var(--mint-soft); }
+    .base-route-value.personal { background: var(--coral-soft); }
+    .base-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      margin: 3px 0 10px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .base-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .base-legend i { width: 12px; height: 12px; border-radius: 4px; }
+    .base-legend .auto { background: var(--gold-soft); }
+    .base-legend .kc { background: var(--mint-soft); }
+    .base-legend .personal { background: var(--coral-soft); }
+    .base-table-explain {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .owner-pill { display: inline-flex; padding: 4px 8px; border-radius: 999px; background: var(--blue-soft); color: #3347aa; font-weight: 800; }
+
+    .mini-stack {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      padding: 20px;
+      border-radius: 20px;
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .mini-stack h3 { margin: 0 0 3px; font-size: 17px; }
+    .mini-stack > p { margin: 0 0 8px; color: #aebad0; font-size: 11px; }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 58px;
+      gap: 8px;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    .bar {
+      height: 9px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255,255,255,.11);
+    }
+
+    .bar > i {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--mint);
+    }
+
+    .bar-row:nth-of-type(3) .bar > i { background: var(--blue); }
+    .bar-row:nth-of-type(4) .bar > i { background: var(--violet); }
+    .bar-row b { text-align: right; color: #dce4f2; }
+
+    .team-load-row {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,.11);
+    }
+
+    .team-load-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .team-load-top span { min-width: 0; }
+    .team-load-row b { display: block; color: #fff; font-size: 11px; }
+    .team-load-row small { display: block; margin-top: 2px; color: #9cabc3; font-size: 9px; }
+    .team-load-row strong { color: var(--mint); font-size: 18px; white-space: nowrap; }
+    .team-load-meter {
+      height: 7px;
+      margin-top: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+    }
+
+    .team-load-meter i {
+      display: block;
+      width: var(--load);
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--blue), var(--mint));
+    }
+
+    .team-load-row .team-load-caption {
+      margin-top: 5px;
+      color: #c5cfdf;
+    }
+
+    .base-filters,
+    .regional-controls {
+      display: grid;
+      grid-template-columns: minmax(180px, .8fr) minmax(280px, 1.2fr);
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #f6f8fb;
+    }
+
+    .base-filters label,
+    .regional-controls label {
+      display: grid;
+      min-width: 0;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      user-select: none;
+    }
+
+    .base-filters select,
+    .regional-controls select {
+      width: 100%;
+      min-width: 0;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 11px;
+    }
+
+    .snapshot-note {
+      margin-top: 16px;
+      padding: 13px 15px;
+      border-left: 3px solid var(--gold);
+      border-radius: 0 12px 12px 0;
+      background: var(--gold-soft);
+      color: #69511d;
+      font-size: 11px;
+    }
+
+    .journey {
+      position: relative;
+      padding: 26px;
+      overflow: hidden;
+      border-radius: 24px;
+      background:
+        linear-gradient(rgba(255,255,255,.92), rgba(255,255,255,.92)),
+        radial-gradient(circle at 0 0, var(--mint), transparent 28rem);
+      border: 1px solid var(--line);
+    }
+
+    .journey-start {
+      width: min(620px, 100%);
+      margin: 0 auto;
+      padding: 18px 22px;
+      border-radius: 19px;
+      background: var(--navy);
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 14px 30px rgba(22,35,61,.18);
+    }
+
+    .journey-start small { color: var(--mint); font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+    .journey-start strong { display: block; margin-top: 4px; font-size: 23px; }
+    .journey-start span { display: block; margin-top: 4px; color: #b7c2d5; font-size: 11px; }
+
+    .arrow-down {
+      display: grid;
+      place-items: center;
+      height: 46px;
+      color: var(--blue);
+      font-size: 28px;
+      font-weight: 300;
+    }
+
+    .diamond {
+      display: grid;
+      place-items: center;
+      width: 170px;
+      height: 70px;
+      margin: 0 auto 40px;
+      transform: rotate(0deg);
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      background: var(--blue);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .route-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: .75fr 1.25fr 1fr;
+      gap: 15px;
+    }
+
+    .route-grid::before {
+      content: "";
+      position: absolute;
+      top: -20px;
+      left: 13%;
+      right: 16%;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .route-card {
+      position: relative;
+      min-height: 250px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      outline: none;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .route-card::before {
+      content: "";
+      position: absolute;
+      top: -21px;
+      left: 50%;
+      width: 1px;
+      height: 20px;
+      background: var(--line);
+    }
+
+    .route-card:hover,
+    .route-card:focus {
+      z-index: 4;
+      transform: translateY(-4px);
+      border-color: var(--blue);
+      box-shadow: 0 16px 38px rgba(40,57,95,.15);
+    }
+
+    .route-card[data-tip]::after {
+      content: attr(data-tip);
+      position: absolute;
+      z-index: 10;
+      left: 18px;
+      right: 18px;
+      bottom: calc(100% + 10px);
+      padding: 11px 13px;
+      border-radius: 12px;
+      background: #0e1728;
+      color: #fff;
+      font-size: 11px;
+      line-height: 1.45;
+      opacity: 0;
+      transform: translateY(5px);
+      pointer-events: none;
+      transition: .18s ease;
+      box-shadow: 0 12px 30px rgba(0,0,0,.18);
+    }
+
+    .route-card:hover::after,
+    .route-card:focus::after { opacity: 1; transform: translateY(0); }
+
+    .route-card.digital { border-top: 5px solid var(--gold); }
+    .route-card.kc { border-top: 5px solid var(--mint); }
+    .route-card.personal { border-top: 5px solid var(--coral); }
+
+    .route-card .route-label { color: var(--muted); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+    .route-card h3 { margin: 7px 0 4px; font-size: 22px; line-height: 1.1; letter-spacing: -.035em; }
+    .route-card .route-volume { margin: 13px 0; font-size: 30px; font-weight: 900; letter-spacing: -.04em; }
+    .route-card .route-volume span { color: var(--muted); font-size: 11px; font-weight: 500; letter-spacing: 0; }
+    .route-card ul { margin: 12px 0 0; padding-left: 17px; color: var(--muted); font-size: 12px; }
+    .route-card li + li { margin-top: 5px; }
+
+    .subroute {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .subroute div { padding: 9px; border-radius: 11px; background: #f6f8fb; font-size: 10px; }
+    .subroute b { display: block; color: var(--ink); font-size: 12px; }
+
+    .handoff {
+      display: grid;
+      grid-template-columns: 1fr 46px 1fr;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 15px;
+      background: var(--mint-soft);
+      color: #174d42;
+      font-size: 11px;
+    }
+
+    .handoff b { display: block; font-size: 12px; }
+    .handoff i { text-align: center; color: #0a8c6f; font-size: 22px; font-style: normal; }
+
+    .flow-instruction {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin: 16px 0;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .flow-instruction b {
+      display: grid;
+      place-items: center;
+      width: 23px;
+      height: 23px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: 10px;
+    }
+
+    .region-flow {
+      display: grid;
+      grid-template-columns: 1.05fr 34px repeat(3, 1fr);
+      gap: 10px;
+      align-items: stretch;
+      padding: 13px;
+      border-radius: 19px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .region-flow + .region-flow { margin-top: 11px; }
+    .region-flow.attack-flow { box-shadow: inset 4px 0 0 #6a58ed; }
+    .region-flow.defense-flow { box-shadow: inset 4px 0 0 #159b81; }
+
+    .flow-region,
+    .flow-outcome {
+      padding: 15px;
+      border-radius: 14px;
+    }
+
+    .flow-region { color: #fff; }
+    .attack-flow .flow-region { background: linear-gradient(135deg, #5b48d5, #765fff); }
+    .defense-flow .flow-region { background: linear-gradient(135deg, #126d62, #159b81); }
+    .flow-region small, .flow-outcome small { display: block; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; }
+    .flow-region small { opacity: .78; }
+    .flow-region strong { display: block; margin: 5px 0 2px; font-size: 23px; }
+    .flow-region span { font-size: 11px; opacity: .84; }
+
+    .flow-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      font-size: 23px;
+    }
+
+    .flow-outcome { border: 1px solid var(--line); }
+    .flow-outcome.auto { background: var(--gold-soft); border-color: #f2d995; }
+    .flow-outcome.kc { background: var(--mint-soft); border-color: #a9ead9; }
+    .flow-outcome.personal { background: var(--coral-soft); border-color: #ffc2b8; }
+    .flow-outcome small { color: var(--muted); }
+    .flow-outcome strong { display: block; margin: 6px 0 2px; font-size: 25px; letter-spacing: -.04em; }
+    .flow-outcome span { display: block; color: var(--muted); font-size: 10px; line-height: 1.4; }
+
+    .flow-totals {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .flow-total {
+      padding: 14px 16px;
+      border-radius: 15px;
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .flow-total small { color: #aebad0; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; }
+    .flow-total strong { display: block; margin-top: 4px; color: var(--mint); font-size: 25px; }
+    .flow-total span { color: #b7c2d5; font-size: 10px; }
+
+    .model-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .model-route {
+      position: relative;
+      min-height: 250px;
+      padding: 21px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+    }
+
+    .model-route.auto { background: var(--gold-soft); border-color: #f2d995; }
+    .model-route.kc { background: var(--mint-soft); border-color: #a9ead9; }
+    .model-route.personal { background: var(--coral-soft); border-color: #ffc2b8; }
+    .model-route small { color: var(--muted); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+    .model-route h3 { margin: 8px 0 3px; font-size: 23px; line-height: 1.08; letter-spacing: -.03em; }
+    .model-route .route-count { margin: 15px 0 4px; font-size: 38px; font-weight: 900; letter-spacing: -.05em; }
+    .model-route .route-share { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .model-route p { margin: 14px 0 0; color: var(--muted); font-size: 12px; }
+    .model-route b { color: var(--ink); }
+
+    .boundary-note {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 17px;
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .boundary-note > div { padding: 8px 11px; border-radius: 12px; background: rgba(255,255,255,.07); }
+    .boundary-note small { display: block; color: #aebad0; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+    .boundary-note strong { display: block; margin: 4px 0; color: var(--mint); font-size: 18px; }
+    .boundary-note span { color: #c6d0e0; font-size: 10px; line-height: 1.4; }
+
+    .region-overlay {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 18px;
+    }
+
+    .region-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 185px;
+      padding: 21px;
+      border-radius: 20px;
+      color: #fff;
+    }
+
+    .region-card.attack { background: linear-gradient(135deg, #5b48d5, #7b65ff); }
+    .region-card.defense { background: linear-gradient(135deg, #126d62, #159b81); }
+    .region-card small { font-size: 10px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; opacity: .78; }
+    .region-card h3 { margin: 7px 0 8px; font-size: 25px; }
+    .region-card p { margin: 0; color: rgba(255,255,255,.82); font-size: 12px; max-width: 590px; }
+    .region-card .region-numbers { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+    .region-card .region-numbers > span { padding: 7px 10px; border-radius: 10px; background: rgba(255,255,255,.12); font-size: 11px; }
+    .region-card .region-numbers b { font-size: 14px; }
+    .region-card .region-numbers em { font-style: normal; }
+
+    .overlay-rule {
+      margin-top: 15px;
+      padding: 14px 17px;
+      border-radius: 15px;
+      background: var(--blue-soft);
+      color: #32439e;
+      font-size: 12px;
+    }
+
+    .regional-planning {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: #fff;
+    }
+
+    .regional-planning-head {
+      display: grid;
+      grid-template-columns: minmax(260px, .7fr) minmax(500px, 1.3fr);
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+
+    .regional-planning h3 { margin: 0 0 5px; font-size: 21px; }
+    .regional-planning-head p { margin: 0; color: var(--muted); font-size: 11px; }
+    .regional-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; padding: 0; border: 0; background: transparent; }
+
+    .regional-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 9px;
+      margin-bottom: 13px;
+    }
+
+    .regional-summary div {
+      padding: 12px 14px;
+      border-radius: 13px;
+      background: #f6f8fb;
+    }
+
+    .regional-summary small { display: block; color: var(--muted); font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+    .regional-summary strong { display: block; margin-top: 4px; font-size: 21px; }
+    .regional-summary span { display: block; margin-top: 2px; color: var(--muted); font-size: 9px; }
+
+    .regional-table-wrap { overflow-x: auto; }
+    .regional-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 10px; }
+    .regional-table th { padding: 9px 8px; color: var(--muted); background: #f6f8fb; text-align: left; font-size: 8px; text-transform: uppercase; letter-spacing: .05em; }
+    .regional-table td { padding: 9px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+    .regional-table th:first-child { width: 20%; }
+    .regional-table td:not(:first-child), .regional-table th:not(:first-child) { text-align: right; }
+    .regional-table td:first-child b { display: block; font-size: 11px; }
+    .regional-table td:first-child span { color: var(--muted); font-size: 9px; }
+    .regional-table .fte-cell { color: #144c42; font-weight: 900; background: rgba(47,218,177,.07); }
+    .regional-table .senior-cell { color: #8b3023; font-weight: 900; background: rgba(255,118,95,.07); }
+    .regional-note { margin: 11px 0 0; color: var(--muted); font-size: 10px; }
+
+    .threshold-compare {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .threshold-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .threshold-card.recommended {
+      border: 2px solid var(--mint);
+      background: linear-gradient(145deg, #effcf8, #fff);
+      box-shadow: 0 12px 30px rgba(31, 167, 132, .12);
+    }
+
+    .threshold-card small {
+      display: block;
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .threshold-card h4 { margin: 5px 0 9px; font-size: 20px; }
+    .threshold-card p { margin: 0 0 10px; color: var(--muted); font-size: 11px; }
+    .threshold-card .threshold-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .threshold-card .threshold-metrics span {
+      padding: 8px;
+      border-radius: 10px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .threshold-card .threshold-metrics b {
+      display: block;
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .calc {
+      display: grid;
+      grid-template-columns: minmax(300px, .8fr) minmax(0, 1.2fr);
+      gap: 20px;
+    }
+
+    .controls {
+      padding: 21px;
+      border-radius: 20px;
+      background: #f6f8fb;
+      border: 1px solid var(--line);
+    }
+
+    .control + .control { margin-top: 18px; }
+    .control-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .control-head label { color: var(--muted); font-size: 11px; }
+    .control-head output { color: var(--ink); font-size: 13px; font-weight: 900; }
+    input[type="range"] { width: 100%; accent-color: var(--blue); }
+
+    .evidence {
+      display: grid;
+      gap: 9px;
+      margin-top: 19px;
+    }
+
+    .evidence div {
+      display: grid;
+      grid-template-columns: 66px minmax(0, 1fr);
+      gap: 9px;
+      padding: 10px;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .evidence b { color: var(--blue); font-size: 13px; white-space: nowrap; }
+    .evidence strong { display: block; color: var(--ink); font-size: 11px; }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      align-content: start;
+    }
+
+    .result-card {
+      min-height: 139px;
+      padding: 19px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .result-card.featured { grid-column: 1 / -1; background: var(--navy); color: #fff; border-color: transparent; }
+    .result-card small { color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
+    .result-card.featured small { color: #aebad0; }
+    .result-card strong { display: block; margin-top: 8px; font-size: 33px; line-height: 1; letter-spacing: -.045em; }
+    .result-card.featured strong { color: var(--mint); font-size: 44px; }
+    .result-card p { margin: 9px 0 0; color: var(--muted); font-size: 11px; }
+    .result-card.featured p { color: #b9c4d6; }
+
+    .stress {
+      margin-top: 15px;
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--coral-soft);
+      color: #74342a;
+      font-size: 11px;
+    }
+
+    .cost-facts {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+      margin-bottom: 18px;
+    }
+
+    .cost-fact {
+      min-height: 135px;
+      padding: 19px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .cost-fact.verified { border-top: 4px solid var(--mint); }
+    .cost-fact.missing { border-top: 4px solid var(--coral); }
+    .cost-fact small { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; font-weight: 900; }
+    .cost-fact strong { display: block; margin-top: 10px; font-size: 29px; letter-spacing: -.04em; }
+    .cost-fact p { margin: 8px 0 0; color: var(--muted); font-size: 11px; }
+
+    .workforce-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .workforce-card {
+      padding: 20px;
+      border-radius: 20px;
+      background: #f7f9fc;
+      border: 1px solid var(--line);
+    }
+
+    .workforce-card h3 { margin: 0 0 5px; font-size: 18px; }
+    .workforce-card > p { margin: 0 0 15px; color: var(--muted); font-size: 11px; }
+
+    .calculation-scenario {
+      margin-bottom: 15px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--blue);
+      border-radius: 0 13px 13px 0;
+      background: var(--blue-soft);
+    }
+
+    .calculation-scenario small {
+      display: block;
+      color: var(--blue);
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .calculation-scenario strong { display: block; margin-top: 3px; font-size: 13px; }
+    .calculation-scenario span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .assumption-hint { margin: 5px 0 0; color: var(--muted); font-size: 9px; }
+
+    .role-head {
+      display: grid;
+      grid-template-columns: 1.2fr .75fr .75fr;
+      gap: 8px;
+      margin-top: 15px;
+      padding-bottom: 7px;
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .role-head span:nth-child(2) { text-align: right; }
+
+    .role-row {
+      display: grid;
+      grid-template-columns: 1.2fr .75fr .75fr;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 11px;
+    }
+
+    .role-row:last-child { border-bottom: 0; }
+    .role-row b { display: block; font-size: 12px; }
+    .role-row span { color: var(--muted); font-size: 10px; }
+    .role-row output { text-align: right; font-weight: 900; font-size: 14px; }
+
+    .cost-output {
+      margin-top: 16px;
+      padding: 18px;
+      border-radius: 17px;
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .cost-output small { color: #aebad0; text-transform: uppercase; font-size: 9px; letter-spacing: .08em; }
+    .cost-output strong { display: block; margin-top: 5px; color: var(--mint); font-size: 34px; letter-spacing: -.04em; }
+    .cost-output p { margin: 7px 0 0; color: #b6c1d3; font-size: 10px; }
+    .cost-output .balance-formula {
+      display: block;
+      margin-top: 9px;
+      padding-top: 9px;
+      border-top: 1px solid rgba(255,255,255,.13);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .current-load {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .current-load div { padding: 13px; border-radius: 14px; background: #fff; border: 1px solid var(--line); }
+    .current-load b { display: block; font-size: 21px; }
+    .current-load span { color: var(--muted); font-size: 9px; }
+
+    .scenario-wrap {
+      margin-top: 18px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+    }
+
+    .scenario-wrap h3 { margin: 0 0 5px; font-size: 18px; }
+    .scenario-wrap > p { margin: 0 0 14px; color: var(--muted); font-size: 11px; }
+    .scenario-table { table-layout: fixed; font-size: 10px; }
+    .scenario-table th,
+    .scenario-table td {
+      padding: 10px 8px;
+      text-align: left;
+      white-space: normal;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+    .scenario-table th:nth-child(2),
+    .scenario-table td:nth-child(2),
+    .scenario-table th:nth-child(4),
+    .scenario-table td:nth-child(4),
+    .scenario-table th:nth-child(5),
+    .scenario-table td:nth-child(5) { text-align: center; }
+    .scenario-table td:first-child strong { display: block; color: var(--ink); }
+    .scenario-table td:first-child span { color: var(--muted); font-size: 9px; }
+
+    .risk-pill {
+      display: inline-flex;
+      align-items: center;
+      min-width: 74px;
+      justify-content: center;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .risk-pill.low { color: #0f6c5b; background: var(--mint-soft); }
+    .risk-pill.medium { color: #8a5a00; background: #fff3cf; }
+    .risk-pill.high { color: #8b2e24; background: var(--coral-soft); }
+
+    .scenario-note {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 13px;
+    }
+
+    .scenario-note div {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #f6f8fb;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .scenario-note b { display: block; margin-bottom: 3px; color: var(--ink); font-size: 11px; }
+
+    .crazy-title {
+      margin: 18px 0 9px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .crazy-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .crazy-card {
+      padding: 15px;
+      border-radius: 15px;
+      border: 1px solid var(--line);
+      background: #f7f9fc;
+    }
+
+    .crazy-card small { color: var(--blue); font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; }
+    .crazy-card strong { display: block; margin: 5px 0; font-size: 15px; line-height: 1.2; }
+    .crazy-card p { margin: 0; color: var(--muted); font-size: 10px; }
+    .crazy-card b { display: block; margin-top: 8px; color: #0f8069; font-size: 11px; }
+
+    .product-lane {
+      display: grid;
+      grid-template-columns: 1fr 52px 1fr 52px 1fr;
+      align-items: stretch;
+      gap: 9px;
+    }
+
+    .product-step {
+      min-height: 190px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: #fff;
+    }
+
+    .product-step:nth-child(3) { background: var(--blue-soft); border-color: #cbd3ff; }
+    .product-step:nth-child(5) { background: var(--mint-soft); border-color: #b5efd9; }
+    .product-step small { color: var(--blue); font-size: 10px; font-weight: 900; text-transform: uppercase; }
+    .product-step h3 { margin: 7px 0 8px; font-size: 18px; }
+    .product-step p { margin: 0; color: var(--muted); font-size: 11px; }
+    .product-arrow { display: grid; place-items: center; color: var(--blue); font-size: 27px; }
+
+    .fte-band {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 18px;
+      padding: 17px 20px;
+      border-radius: 17px;
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .fte-band strong { color: var(--mint); font-size: 23px; }
+    .fte-band span { color: #bdc7d8; font-size: 11px; max-width: 700px; }
+
+    .pilot-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .pilot-card {
+      min-height: 210px;
+      padding: 19px;
+      border-radius: 19px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .pilot-card .week { color: var(--blue); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; }
+    .pilot-card h3 { margin: 7px 0 8px; font-size: 17px; }
+    .pilot-card p { margin: 0; color: var(--muted); font-size: 11px; }
+    .pilot-card b { display: block; margin-top: 14px; font-size: 11px; }
+
+    .stop-rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .stop-rules div { padding: 14px; border-radius: 14px; background: var(--coral-soft); color: #71352c; font-size: 11px; }
+    .stop-rules b { display: block; margin-bottom: 4px; }
+
+    .sources {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .source-card {
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: #fff;
+    }
+
+    .source-card small { color: var(--blue); font-weight: 900; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+    .source-card strong { display: block; margin: 5px 0; font-size: 13px; }
+    .source-card p { margin: 0; color: var(--muted); font-size: 10px; }
+    .source-card a { display: inline-block; margin-top: 8px; color: #354bc1; font-size: 10px; font-weight: 800; }
+
+    .method {
+      margin-top: 15px;
+      padding: 15px 17px;
+      border-radius: 15px;
+      background: #f5f7fb;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .mobile-summary { display: none; }
+
+    @media (max-width: 1120px) {
+      .shell { grid-template-columns: 238px minmax(0, 1fr); gap: 16px; }
+      .sidebar { padding: 20px 14px; }
+      .hero-stats { grid-template-columns: 1fr 1fr; }
+      .section-head { grid-template-columns: 52px 1fr; }
+      .section-head > p { grid-column: 2; }
+      .split, .calc { grid-template-columns: 1fr; }
+      .cost-facts, .pilot-grid { grid-template-columns: 1fr 1fr; }
+      .product-lane { grid-template-columns: 1fr; }
+      .product-arrow { min-height: 35px; transform: rotate(90deg); }
+    }
+
+    @media (max-width: 820px) {
+      .shell { width: min(100% - 18px, 720px); display: block; padding-top: 9px; }
+      .sidebar { position: static; width: 100%; height: auto; min-height: 0; margin-bottom: 12px; border-radius: 22px; }
+      .brand, .threshold, .sidebar-foot, .toc-title { display: none; }
+      .toc { display: flex; overflow-x: auto; padding-bottom: 2px; }
+      .toc a { min-width: 150px; background: rgba(255,255,255,.06); }
+      .toc a.active::before { left: 10px; right: 10px; top: auto; bottom: 2px; width: auto; height: 2px; }
+      .mobile-summary { display: block; color: var(--mint); font-size: 11px; font-weight: 900; margin: 0 0 10px 8px; }
+      .hero { min-height: 0; padding: 28px 22px; border-radius: 23px; }
+      .hero h1 { font-size: 42px; }
+      .hero-stats { grid-template-columns: 1fr 1fr; }
+      .section { padding: 23px 18px; border-radius: 21px; }
+      .section-head { grid-template-columns: 42px 1fr; gap: 11px; }
+      .section-no { width: 40px; height: 40px; border-radius: 12px; }
+      .decision-strip, .route-grid, .region-overlay, .workforce-grid, .sources, .model-flow, .boundary-note, .regional-planning-head, .threshold-compare { grid-template-columns: 1fr; }
+      .regional-summary { grid-template-columns: 1fr 1fr; }
+      .base-filters { grid-template-columns: 1fr; }
+      .decision { border-right: 0; border-bottom: 1px solid var(--line); }
+      .decision:last-child { border-bottom: 0; }
+      .route-grid::before, .route-card::before { display: none; }
+      .route-card { min-height: 0; }
+      .diamond { margin-bottom: 15px; }
+      .region-flow { grid-template-columns: 1fr; }
+      .flow-arrow { min-height: 24px; transform: rotate(90deg); }
+      .flow-totals { grid-template-columns: 1fr; }
+      .cost-facts, .pilot-grid, .stop-rules { grid-template-columns: 1fr; }
+      .current-load { grid-template-columns: 1fr 1fr; }
+      .scenario-note { grid-template-columns: 1fr; }
+      .crazy-grid { grid-template-columns: 1fr 1fr; }
+      .fte-band { display: block; }
+      .fte-band span { display: block; margin-top: 6px; }
+    }
+
+    @media (max-width: 520px) {
+      .hero-stats, .results { grid-template-columns: 1fr; }
+      .hero-stat { min-height: 88px; }
+      .section-head h2 { font-size: 28px; }
+      .data-table { display: block; overflow-x: auto; }
+      .subroute { grid-template-columns: 1fr; }
+      .handoff { grid-template-columns: 1fr; }
+      .handoff i { transform: rotate(90deg); }
+      .crazy-grid { grid-template-columns: 1fr; }
+      .regional-summary { grid-template-columns: 1fr; }
+      .result-card.featured { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Содержание">
+      <div class="brand">
+        <div class="brand-mark">RRE</div>
+        <div><b>Модель работы с базой</b><span>M / L · 5 команд · 23.07.2026</span></div>
+      </div>
+      <div class="threshold">
+        <small>Зачем меняем модель</small>
+        <strong>4 ставки — продажам нового продукта<br>ещё 2–6 — потенциал сокращения</strong>
+        <p>Возможная экономия: 7,8–23,3 млн ₽ в год. Регион и чек нужны только для безопасного распределения клиентов.</p>
+      </div>
+      <div class="mobile-summary">Содержание · нажмите на раздел</div>
+      <div class="toc-title">Как читать документ</div>
+      <nav class="toc">
+        <a href="#decision" class="active"><span class="toc-num">01</span><span><b>Решение</b><span>Что меняем и чего не обещаем</span></span></a>
+        <a href="#base"><span class="toc-num">02</span><span><b>База сейчас</b><span>Клиенты, чеки, выручка, промо</span></span></a>
+        <a href="#cjm"><span class="toc-num">03</span><span><b>Путь клиента</b><span>Три способа обслуживания</span></span></a>
+        <a href="#regions"><span class="toc-num">04</span><span><b>Региональное правило</b><span>Кому нужен личный менеджер</span></span></a>
+        <a href="#capacity"><span class="toc-num">05</span><span><b>Нагрузка команды</b><span>Сколько разговоров реально покрыть</span></span></a>
+        <a href="#economics"><span class="toc-num">06</span><span><b>Команда и затраты</b><span>Люди, стоимость и варианты экономии</span></span></a>
+        <a href="#product"><span class="toc-num">07</span><span><b>Новый продукт</b><span>Отдельная команда · 4 ставки</span></span></a>
+        <a href="#pilot"><span class="toc-num">08</span><span><b>Пилот</b><span>Как доказать эффект без риска</span></span></a>
+        <a href="#sources"><span class="toc-num">09</span><span><b>Источники</b><span>Что подтверждено, что допущение</span></span></a>
+      </nav>
+      <div class="sidebar-foot">Начните с разделов 01 и 03: там решение и простая схема. Остальные разделы объясняют расчёт, риски и источники.</div>
+    </aside>
+
+    <main>
+      <header class="hero">
+        <div class="eyebrow">Краткая модель для решения · черновик пилота</div>
+        <h1>Как обслужить M/L-базу <span>меньшей командой</span> и не потерять крупных клиентов</h1>
+        <p class="hero-lead">У нас 38 сотрудников и 6 886 клиентов среднего и крупного сегмента. Четыре ставки выделяем в отдельную команду продаж нового продукта. Остальных клиентов предлагаем разделить просто: небольшой месячный чек обслуживает единая телефонная команда, крупного клиента продолжает вести персональный менеджер. Цель — высвободить ещё 2–6 ставок без потери выручки.</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong>6 886</strong><span>клиентов среднего и крупного сегмента</span></div>
+          <div class="hero-stat"><strong>38 → 34 + 4</strong><span>текущая база + продажи нового продукта</span></div>
+          <div class="hero-stat accent">
+            <strong class="hero-pair" style="font-size:30px"><span id="heroQueue">5 391</span><i>/</i><span id="heroPersonal">1 350</span></strong>
+            <span class="hero-pair-label">телефонная команда / личный менеджер при границе <b class="inline-number" id="heroThreshold">80</b> тыс. ₽</span>
+          </div>
+          <div class="hero-stat"><strong>7,8–23,3 млн ₽</strong><span>потенциальная экономия в год при −2…−6 ставках</span></div>
+        </div>
+      </header>
+
+      <section class="section" id="decision">
+        <div class="section-head">
+          <div class="section-no">01</div>
+          <div><h2>Суть решения в трёх правилах</h2></div>
+          <p>Цель — освободить людей для нового продукта и снизить затраты на текущую базу, не переводя крупных клиентов в массовое обслуживание.</p>
+        </div>
+        <div class="decision-strip">
+          <article class="decision primary">
+            <small>Правило 1 · новый продукт</small>
+            <strong>4 ставки выделяем в отдельную команду продаж нового продукта</strong>
+            <p>Это перераспределение внутри 38 текущих ставок. Оно не даёт прямой экономии, но создаёт отдельный ресурс для сложных продаж нового продукта.</p>
+          </article>
+          <article class="decision risk">
+            <small>Правило 2 · текущая база</small>
+            <strong>Небольших клиентов объединяем, крупных оставляем персональным менеджерам</strong>
+            <p><span id="decisionQueue">5 391</span> клиента ведёт общая телефонная команда. <span id="decisionPersonal">1 350</span> крупных клиентов, которые приносят <span id="decisionShare">64,8%</span> трат M/L, остаются у S3, RSM или KAM.</p>
+          </article>
+          <article class="decision">
+            <small>Правило 3 · экономия</small>
+            <strong>Оставшиеся 34 ставки пробуем уменьшить ещё на 2–6</strong>
+            <p>Для этого меняем частоту звонков, используем автоматические сообщения, предиктивный набор и убираем ручную сборку предложения.</p>
+          </article>
+        </div>
+        <div class="fte-band"><strong>Выгода</strong><span>Если после пилота получится убрать 2–6 ставок из обслуживания текущей базы, потенциальная экономия составит 7,8–23,3 млн ₽ в год. Это диапазон для проверки, а не обещанный результат.</span></div>
+        <div class="guardrail">
+          <b>!</b>
+          <div><strong>Сокращение считаем сценарием, а не обещанием.</strong><span>Четыре ставки на продажи нового продукта — перераспределение без прямой экономии. Дополнительное сокращение возможно только после проверки частоты контактов, выручки и полного времени на один звонок; ниже показан запас и цена каждого сценария.</span></div>
+        </div>
+      </section>
+
+      <section class="section" id="base">
+        <div class="section-head">
+          <div class="section-no">02</div>
+          <div><h2>Как выглядит база сейчас</h2></div>
+          <p>Фактический срез 6 886 клиентов M/L в пяти выбранных командах, категория SS&amp;Sub&amp;Ltr. «Промо» — наличие хотя бы одного промо-признака в строке клиента.</p>
+        </div>
+        <div class="split">
+          <div>
+            <div class="base-filters">
+              <label>Регион
+                <select id="baseRegionFilter" aria-label="Фильтр по региону"></select>
+              </label>
+              <label>В регионе со стабильной долей личный менеджер ведёт клиента
+                <select id="baseThreshold" aria-label="Граница личного ведения в стабильном регионе">
+                  <option value="70000">если траты больше 70 тыс. ₽ в месяц</option>
+                  <option value="80000" selected>если траты больше 80 тыс. ₽ — базовый сценарий</option>
+                  <option value="100000">если траты больше 100 тыс. ₽ в месяц</option>
+                </select>
+              </label>
+            </div>
+            <div class="base-legend" aria-label="Обозначения способов обслуживания">
+              <span><i class="auto"></i>автоматические сообщения</span>
+              <span><i class="kc"></i>телефонная команда</span>
+              <span><i class="personal"></i>личный менеджер</span>
+            </div>
+            <div class="base-table-wrap">
+              <table class="data-table base-table">
+                <thead>
+                  <tr><th>Месячные траты клиента</th><th>Клиенты</th><th>Траты, млн ₽</th><th>В промо</th><th>Автосообщения</th><th>Телефонная команда</th><th>Личный менеджер</th></tr>
+                </thead>
+                <tbody id="baseTableBody"></tbody>
+              </table>
+            </div>
+            <p class="base-table-explain">Если в одной строке есть числа и у телефонной команды, и у личного менеджера, это не наложение: клиенты с одинаковым чеком распределяются по-разному из-за состояния региона.</p>
+            <div class="snapshot-note" id="baseSnapshot"><b>При выбранных фильтрах:</b> расчёт обновится после загрузки страницы.</div>
+          </div>
+          <aside class="mini-stack">
+            <h3>Наши команды · M/L</h3>
+            <p>Полоса показывает клиентов на одного сотрудника. Это индикатор текущей плотности базы, а не норматив производительности.</p>
+            <div class="team-load-row">
+              <div class="team-load-top"><span><b>Фармеры 2</b><small>2 001 клиент</small></span><strong>8 сотрудников</strong></div>
+              <div class="team-load-meter"><i style="--load:100%"></i></div>
+              <small class="team-load-caption">≈250 клиентов на сотрудника</small>
+            </div>
+            <div class="team-load-row">
+              <div class="team-load-top"><span><b>Фармеры 4</b><small>1 896 клиентов</small></span><strong>8 сотрудников</strong></div>
+              <div class="team-load-meter"><i style="--load:95%"></i></div>
+              <small class="team-load-caption">≈237 клиентов на сотрудника</small>
+            </div>
+            <div class="team-load-row">
+              <div class="team-load-top"><span><b>Фармеры 5</b><small>1 488 клиентов</small></span><strong>6 сотрудников</strong></div>
+              <div class="team-load-meter"><i style="--load:99%"></i></div>
+              <small class="team-load-caption">≈248 клиентов на сотрудника</small>
+            </div>
+            <div class="team-load-row">
+              <div class="team-load-top"><span><b>Re MASD</b><small>994 клиента</small></span><strong>9 сотрудников</strong></div>
+              <div class="team-load-meter"><i style="--load:44%"></i></div>
+              <small class="team-load-caption">≈110 клиентов на сотрудника</small>
+            </div>
+            <div class="team-load-row">
+              <div class="team-load-top"><span><b>Фармеры 1 KAM</b><small>507 клиентов</small></span><strong>7 сотрудников</strong></div>
+              <div class="team-load-meter"><i style="--load:29%"></i></div>
+              <small class="team-load-caption">≈72 клиента на сотрудника</small>
+            </div>
+            <p style="margin-top:10px">Итого: <strong style="color:#fff">38 сотрудников</strong>. В клиентском файле 42 имени в закреплениях, но для расчёта используем подтверждённую фактическую численность.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="cjm">
+        <div class="section-head">
+          <div class="section-no">03</div>
+          <div><h2>Куда попадёт каждый клиент</h2></div>
+          <p>Главное правило — размер месячных трат. Регион нужен только для выбора границы между общей телефонной командой и личным менеджером.</p>
+        </div>
+        <div class="journey">
+          <div class="journey-start">
+            <small>Все клиенты в расчёте</small>
+            <strong>6 886 клиентов M/L</strong>
+            <span>Пять команд · категория SS&amp;Sub&amp;Ltr · каждому клиенту назначается один из трёх способов обслуживания</span>
+          </div>
+          <div class="model-flow">
+            <article class="model-route auto">
+              <small>Траты 0 ₽ в месяц</small>
+              <h3>Автоматические сообщения</h3>
+              <div class="route-count">145</div>
+              <div class="route-share">2% базы</div>
+              <p>Письма и сообщения по событиям. Менеджер звонит только если клиент проявил интерес или появился риск.</p>
+            </article>
+            <article class="model-route kc">
+              <small>Небольшие месячные траты</small>
+              <h3>Общая телефонная команда</h3>
+              <div class="route-count" id="modelKcCount">5 391</div>
+              <div class="route-share" id="modelKcShare">78,3% базы · телефонная команда S2 / КЦ</div>
+              <p>Одна федеральная очередь без разделения сотрудников по регионам. Частота звонков зависит от сигнала и ценности клиента.</p>
+            </article>
+            <article class="model-route personal">
+              <small>Крупные месячные траты</small>
+              <h3>Личный менеджер</h3>
+              <div class="route-count" id="modelPersonalCount">1 350</div>
+              <div class="route-share" id="modelPersonalShare">19,6% базы · 64,8% трат</div>
+              <p>S3, RSM или KAM отвечает за план клиента, встречи, сложные переговоры и подключение нового продукта.</p>
+            </article>
+          </div>
+
+          <div class="boundary-note">
+            <div><small>Что означает граница</small><strong>Месячные траты, после которых нужен личный менеджер</strong><span>Ниже этой суммы клиента обслуживает общая телефонная команда.</span></div>
+            <div><small>Если доля падает</small><strong>Личный менеджер после 50 тыс. ₽</strong><span>До 50 тыс. ₽ — телефонная команда; выше — S3, RSM или KAM.</span></div>
+            <div><small>Если доля стабильна</small><strong id="boundaryDefenseTitle">Личный менеджер после 80 тыс. ₽</strong><span id="boundaryDefenseCopy">До 80 тыс. ₽ — телефонная команда; выше — S3, RSM или KAM.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="regions">
+        <div class="section-head">
+          <div class="section-no">04</div>
+          <div><h2>Кому оставляем личного менеджера в разных регионах</h2></div>
+          <p>«Граница» — это месячные траты клиента, после которых он выходит из общей телефонной очереди и получает персонального владельца. В атаке это происходит раньше, поэтому личное ведение там плотнее.</p>
+        </div>
+        <div class="region-overlay">
+          <article class="region-card attack">
+            <small>Атака · доля падает / позиция слабая</small>
+            <h3>Личный менеджер — уже после 50 тыс. ₽</h3>
+            <p>Здесь персональное ведение получает 28% базы: почти каждый третий клиент. Это 282 личных клиента на каждую тысячу базы — выше, чем в стабильных регионах.</p>
+            <div class="region-numbers">
+              <span><b>1 450</b> телефонная команда · до 50 тыс.</span>
+              <span><b>540</b> S3 · 50–300 тыс.</span>
+              <span><b>55</b> KAM/RSM · выше 300 тыс.</span>
+              <span><b>28%</b> базы ведётся лично</span>
+            </div>
+          </article>
+          <article class="region-card defense">
+            <small>Защита · доля стабильна</small>
+            <h3 id="defenseRoleTitle">Личный менеджер — после 80 тыс. ₽</h3>
+            <p id="defenseDescription">Здесь лично ведём 16% базы: телефонная команда получает больше клиентов, потому что рыночная позиция стабильна.</p>
+            <div class="region-numbers">
+              <span><b id="defenseKcCount">3 941</b> телефонная команда · до <em id="defenseKcLimit">80 тыс.</em></span>
+              <span><b id="defenseMidPersonal">636</b> S3 · от порога до 300 тыс.</span>
+              <span><b id="defenseSeniorPersonal">119</b> KAM/RSM · выше 300 тыс.</span>
+              <span><b id="defensePersonalShare">16%</b> базы ведётся лично</span>
+            </div>
+          </article>
+        </div>
+        <div class="overlay-rule"><b>Почему абсолютные числа похожи:</b> база стабильных регионов в 2,3 раза больше. Сравнивать нужно долю: при базовом пороге лично ведём 28% клиентов в атаке против 16% в защите. Чтобы усилить атаку ещё сильнее, на пилоте проверяем не новый порог, а меньшие портфели и более частые встречи у S3/RSM/KAM.</div>
+        <div class="threshold-compare" aria-label="Сравнение границ личного ведения в регионах со стабильной долей">
+          <article class="threshold-card">
+            <small>Самая осторожная модель</small>
+            <h4>Личный менеджер после 70 тыс. ₽</h4>
+            <p>Меньше нагрузка на телефонную команду, но заметно больше клиентов и ставок требуется в личном ведении.</p>
+            <div class="threshold-metrics"><span><b id="th70Kc">5 256</b>КЦ</span><span><b id="th70Personal">1 485</b>лично</span><span><b id="th70Fte">39</b>ставок на базу</span></div>
+          </article>
+          <article class="threshold-card recommended">
+            <small>Базовый компромисс</small>
+            <h4>Личный менеджер после 80 тыс. ₽</h4>
+            <p>Снижает очередь телефонной команды относительно 100 тыс. ₽, но не так сильно увеличивает личный слой, как порог 70 тыс. ₽.</p>
+            <div class="threshold-metrics"><span><b id="th80Kc">5 391</b>КЦ</span><span><b id="th80Personal">1 350</b>лично</span><span><b id="th80Fte">37</b>ставок на базу</span></div>
+          </article>
+          <article class="threshold-card">
+            <small>Максимум потока</small>
+            <h4>Личный менеджер после 100 тыс. ₽</h4>
+            <p>Минимум личного ведения, но максимальная очередь КЦ. Используем как стресс-сценарий, а не как рекомендацию.</p>
+            <div class="threshold-metrics"><span><b id="th100Kc">5 570</b>КЦ</span><span><b id="th100Personal">1 171</b>лично</span><span><b id="th100Fte">36</b>ставок на базу</span></div>
+          </article>
+        </div>
+
+        <div class="regional-planning">
+          <div class="regional-planning-head">
+            <div>
+              <h3>Где нужны ставки КЦ, а где — старшие роли</h3>
+              <p>Таблица переводит клиентскую базу каждого региона в ориентировочную нагрузку. Это распределение ставок общей команды, а не создание отдельного штата в каждом регионе.</p>
+            </div>
+            <div class="regional-controls">
+              <label>Регион
+                <select id="regionFilter" aria-label="Фильтр региональной таблицы"></select>
+              </label>
+              <label>В стабильном регионе личный менеджер подключается
+                <select id="defenseThreshold" aria-label="Граница для стабильного региона">
+                  <option value="70000">после 70 тыс. ₽ в месяц</option>
+                  <option value="80000" selected>после 80 тыс. ₽ — базовый сценарий</option>
+                  <option value="100000">после 100 тыс. ₽ в месяц</option>
+                </select>
+              </label>
+              <label>Показать регионы в порядке
+                <select id="regionalSort">
+                  <option value="senior">где больше нагрузка на S3 / KAM / RSM</option>
+                  <option value="kc">где больше нагрузка на телефонную команду</option>
+                  <option value="personalSpend">где больше трат в личном ведении</option>
+                  <option value="total">где больше клиентов всего</option>
+                </select>
+              </label>
+              <label>Насколько больше времени на личного клиента в атаке
+                <select id="attackIntensity">
+                  <option value="1">столько же, сколько в защите</option>
+                  <option value="1.25" selected>на 25% больше — базовый сценарий</option>
+                  <option value="1.5">на 50% больше</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="regional-summary">
+            <div><small>Клиентов в срезе</small><strong id="regionTotal">6 886</strong><span id="regionType">все регионы</span></div>
+            <div><small>Телефонная команда</small><strong id="regionKc">5 391</strong><span id="regionKcFte">≈20,3 ставки S2 / КЦ</span></div>
+            <div><small>Личное ведение</small><strong id="regionPersonal">1 350</strong><span id="regionS3Fte">≈11,8 ставки S3</span></div>
+            <div><small>Самые крупные</small><strong id="regionSenior">174</strong><span id="regionSeniorFte">≈5,0 ставки KAM / RSM</span></div>
+          </div>
+          <div class="regional-table-wrap">
+            <table class="regional-table">
+              <thead>
+                <tr><th>Регион</th><th>Клиенты</th><th>КЦ</th><th>Лично</th><th>Траты лично, млн ₽</th><th>Ставки КЦ</th><th>Ставки S3</th><th>Ставки KAM/RSM</th></tr>
+              </thead>
+              <tbody id="regionalTableBody"></tbody>
+            </table>
+          </div>
+          <p class="regional-note">Расчётная единица: 265 клиентов на ставку КЦ, 100 клиентов личного слоя на S3 и 35 клиентов с тратами выше 300 тыс. ₽ на KAM/RSM. Для атаки выбранный коэффициент увеличивает расчётную долю старших ролей, потому что встречи и проработка должны быть плотнее. Это сценарий для пилота, а не утверждённый норматив.</p>
+        </div>
+      </section>
+
+      <section class="section" id="capacity">
+        <div class="section-head">
+          <div class="section-no">05</div>
+          <div><h2>Сколько КЦ действительно покроет</h2></div>
+          <p>Калькулятор различает попытку и живой контакт, а также заранее вычитает время на входящие обращения. Это критично: входящие нельзя считать «бесплатной» нагрузкой, а «позвонить всей базе» не равно «поговорить со всей базой».</p>
+        </div>
+        <div class="calc">
+          <div class="controls">
+            <div class="control">
+              <div class="control-head"><label for="fte">Сколько сотрудников работает в телефонной команде</label><output id="fteOut">20 ставок</output></div>
+              <input id="fte" type="range" min="4" max="34" step="1" value="20">
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="minutes">Сколько минут в день доступно на всю телефонную работу и оформление</label><output id="minutesOut">270 мин</output></div>
+              <input id="minutes" type="range" min="180" max="360" step="15" value="270">
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="inbound">Из них сколько минут резервируем на входящие обращения</label><output id="inboundOut">30 мин</output></div>
+              <input id="inbound" type="range" min="0" max="120" step="15" value="30">
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="cycle">Сколько занимает одна попытка: звонок, поиск информации и запись в CRM</label><output id="cycleOut">7,0 мин</output></div>
+              <input id="cycle" type="range" min="4" max="14" step=".5" value="7">
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="connect">Какая доля попыток заканчивается разговором с клиентом</label><output id="connectOut">35%</output></div>
+              <input id="connect" type="range" min="15" max="70" step="5" value="35">
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="target">Сколько разговоров с каждым клиентом хотим проводить в месяц</label><output id="targetOut">1,0 раза</output></div>
+              <input id="target" type="range" min=".25" max="2" step=".25" value="1">
+            </div>
+            <div class="evidence">
+              <div><b>29–57%</b><span><strong>Доля разговора · 4 менеджера × 1 день</strong>Это диапазон выборки, а не норматив производительности.</span></div>
+              <div><b>≈43%</b><span><strong>Работа до и после звонка</strong>КП, аналитика, поиск информации, CRM и координация остаются вне разговора.</span></div>
+              <div><b>1–3 мин</b><span><strong>Поиск контекста клиента</strong>Наблюдаемый диапазон одного цикла Client 360.</span></div>
+              <div><b>5–15 мин</b><span><strong>Оффер / тариф при ручном сценарии</strong>Не каждый звонок, но это главный «тихий» расход времени.</span></div>
+              <div><b>174→82 с</b><span><strong>Предиктивная выборка</strong>Медиана разговора снизилась; это наблюдение одного менеджера за два дня, не причинный эффект.</span></div>
+              <div><b id="inboundEvidence">30 мин</b><span><strong>Резерв на входящие обращения</strong>Их наличие подтверждено, но объём не нормирован. 30 минут — редактируемое допущение для сценария, а не факт.</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="results">
+              <div class="result-card featured">
+                <small>Покрытие живыми контактами</small>
+                <strong id="liveCoverage">0,89</strong>
+                <p>живых контакта на клиента в месяц при 20 рабочих днях. Цель справа пересчитывает требуемое число ставок.</p>
+              </div>
+              <div class="result-card">
+                <small>Попыток / месяц</small>
+                <strong id="attempts">13 714</strong>
+                <p id="attemptCoverage">2,54 попытки на клиента · 240 мин/день осталось на исходящий поток</p>
+              </div>
+              <div class="result-card">
+                <small>Живых контактов / месяц</small>
+                <strong id="liveContacts">4 800</strong>
+                <p>зависит от фактического дозвона, не от числа клиентов в портфеле</p>
+              </div>
+              <div class="result-card">
+                <small>Нужно ставок для цели</small>
+                <strong id="requiredFte">23</strong>
+                <p id="targetCopy">для 1,0 живого контакта на клиента</p>
+              </div>
+              <div class="result-card">
+                <small>Клиентов на одну ставку</small>
+                <strong id="clientsPerFte">270</strong>
+                <p>это очередь, а не персональный портфель с одинаковой частотой</p>
+              </div>
+            </div>
+            <div class="stress" id="stressText"><b>Что это значит:</b> модель покрывает заданную цель, но запас небольшой. Пилот должен измерить полное время на попытку и реальный дозвон, иначе расчёт числа сотрудников будет неверным.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="economics">
+        <div class="section-head">
+          <div class="section-no">06</div>
+          <div><h2>Сколько людей нужно и сколько можно сэкономить</h2></div>
+          <p>Численность берём из уточнения команды, клиентов — из клиентской выгрузки, стоимость одной ставки — из витрины затрат по ролям. Это разные источники, поэтому мы не выдаём число закреплений за действующий штат.</p>
+        </div>
+        <div class="cost-facts">
+          <article class="cost-fact verified">
+            <small>Проверено · S2</small>
+            <strong>323 580 ₽</strong>
+            <p>Полная стоимость одной ставки в месяц, февраль 2026. По этой сумме рассчитаны сценарии экономии телефонной команды.</p>
+          </article>
+          <article class="cost-fact verified">
+            <small>Проверено · S3</small>
+            <strong>393 945 ₽</strong>
+            <p>Полная стоимость одной ставки в месяц, февраль 2026. S3 выделен отдельно от S2.</p>
+          </article>
+          <article class="cost-fact verified">
+            <small>Проверено · RSM</small>
+            <strong>450 041 ₽</strong>
+            <p>Полная стоимость одной ставки в месяц, февраль 2026. В витрине RSM выделен отдельной строкой внутри фермерского блока.</p>
+          </article>
+          <article class="cost-fact verified">
+            <small>Проверено · KAM</small>
+            <strong>651 601 ₽</strong>
+            <p>Средняя полная стоимость ставки по уровням KAM; диапазон 408–797 тыс. ₽ в месяц, февраль 2026.</p>
+          </article>
+        </div>
+
+        <div class="workforce-grid">
+          <div class="workforce-card">
+            <h3>Факт по пяти нашим командам</h3>
+            <p>Подтверждённая рабочая численность — 38 сотрудников. 42 уникальных имени в клиентском файле отражают закрепления, но не действующий штат.</p>
+            <div class="current-load">
+              <div><b>38</b><span>сотрудников всего сейчас</span></div>
+              <div><b>181</b><span>M/L клиент на ставку</span></div>
+              <div><b>4</b><span>резерв продукта</span></div>
+              <div><b>34</b><span>остаётся на текущую базу</span></div>
+            </div>
+            <div class="role-row"><span><b>Re Фармеры 2</b>2 001 клиент M/L</span><output>8</output><span>≈250 клиентов / ставка</span></div>
+            <div class="role-row"><span><b>Re Фармеры 4</b>1 896 клиентов M/L</span><output>8</output><span>≈237 клиентов / ставка</span></div>
+            <div class="role-row"><span><b>Re Фармеры 5</b>1 488 клиентов M/L</span><output>6</output><span>≈248 клиентов / ставка</span></div>
+            <div class="role-row"><span><b>Re Фармеры 1 KAM</b>507 клиентов M/L</span><output>7</output><span>≈72 клиента / ставка</span></div>
+            <div class="role-row"><span><b>Re MASD</b>994 клиента M/L</span><output>9</output><span>≈110 клиентов / ставка</span></div>
+            <div class="snapshot-note"><b>Важно:</b> 4 ставки продаж нового продукта — перенос внутри 38 сотрудников, а не экономия. После переноса средняя нагрузка на оставшиеся 34 ставки вырастает примерно до 203 клиентов M/L.</div>
+          </div>
+
+          <div class="workforce-card">
+            <h3>Сколько сотрудников нужно при выбранном сценарии</h3>
+            <p>Это калькулятор, а не текущий штат. Он делит число клиентов на выбранную нагрузку одного сотрудника.</p>
+            <div class="calculation-scenario">
+              <small>Сейчас считаем</small>
+              <strong id="workforceScenario">Стабильные регионы: личный менеджер подключается выше 80 тыс. ₽</strong>
+              <span>Телефонная команда: один живой контакт с каждым клиентом в месяц, время на входящие вычтено выше. Ниже можно менять непроверенные нормы личных портфелей.</span>
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="s3Portfolio">Сколько клиентов может вести один S3</label><output id="s3PortfolioOut">100</output></div>
+              <input id="s3Portfolio" type="range" min="50" max="180" step="10" value="100">
+              <p class="assumption-hint">Рабочая гипотеза, которую нужно проверить на пилоте. Портфель должен помещать всю работу S3: входящие обращения, исходящие контакты, CRM и встречи.</p>
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="seniorPortfolio">Сколько клиентов &gt;300 тыс. может вести один KAM/RSM</label><output id="seniorPortfolioOut">35</output></div>
+              <input id="seniorPortfolio" type="range" min="20" max="70" step="5" value="35">
+              <p class="assumption-hint">Тоже гипотеза: входящие обращения, личные встречи и сложные сделки могут заметно уменьшить реальный портфель.</p>
+            </div>
+            <div class="role-head"><span>Кого обслуживаем</span><span>Нужно</span><span>Как посчитано</span></div>
+            <div class="role-row"><span><b>S2 / телефонная команда</b><span id="kcQueueRole">5 391</span> клиент</span><output id="kcFteRole">23 ставки</output><span id="kcCapacityRule">≈240 клиентов на ставку</span></div>
+            <div class="role-row"><span><b>S3</b><span id="s3QueueRole">1 176</span> клиентов среднего слоя</span><output id="s3FteRole">14 ставок</output><span id="s3CapacityRule">100 клиентов в защите; в атаке времени +25%</span></div>
+            <div class="role-row"><span><b>KAM / RSM</b>174 клиента &gt;300 тыс.</span><output id="seniorFteRole">6 ставок</output><span id="seniorCapacityRule">35 клиентов в защите; в атаке времени +25%</span></div>
+            <div class="role-row"><span><b>Продажи нового продукта</b>отдельная команда, которой передают базу</span><output id="productFteRole">4 ставки</output><span>вычтены заранее из 38</span></div>
+            <div class="cost-output">
+              <small>Итог для 34 сотрудников, оставшихся на текущей базе</small>
+              <strong id="headroomFte">Не хватает 9 ставок</strong>
+              <span class="balance-formula" id="balanceFormula">34 доступно − 23 КЦ − 14 S3 − 6 KAM/RSM = −9</span>
+              <p id="headroomCopy">34 ставки доступны для текущей базы против 43 ставок расчётной потребности. При этих осторожных допущениях сокращать штат нельзя.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario-wrap">
+          <h3>Как пробовать сокращать оставшиеся 34 ставки</h3>
+          <p>Эта таблица автоматически пересчитывается по параметрам выше: выбранной границе личного ведения, дозвону, времени на попытку, желаемой частоте контактов и размеру портфелей S3/KAM/RSM. Экономия считается так, будто сокращается ставка S2 стоимостью 323 580 ₽/мес.</p>
+          <table class="data-table scenario-table">
+            <thead>
+              <tr><th>Сценарий</th><th>Ставок на базу</th><th>Распределение КЦ / S3 / старшие роли</th><th>Живых контактов КЦ / клиент / мес.</th><th>Экономия / год</th><th>Что должно быть правдой</th><th>Риск</th></tr>
+            </thead>
+            <tbody id="scenarioTableBody"></tbody>
+          </table>
+          <div class="scenario-note">
+            <div><b>Вывод при текущих вводных</b><span id="scenarioVerdict">При границе 80 тыс. ₽ и одном живом контакте в месяц расчёт показывает дефицит 3 ставок. Сначала нужен пилот производительности.</span></div>
+            <div><b>Что должно измениться</b><span id="scenarioRequirement">После личного слоя на КЦ остаётся 17 ставок: нужно сократить время на попытку или обзванивать часть низкого приоритета реже.</span></div>
+          </div>
+          <h4 class="crazy-title">Крейзи-идеи, которые могут превратить экономию в реальность</h4>
+          <div class="crazy-grid">
+            <article class="crazy-card"><small>Частота</small><strong>Не звонить всем одинаково</strong><p>Ежемесячно — промо, продление, падение трат и клиенты из регионов с падающей долей. Остальные — раз в квартал или по событию.</p><b id="frequencyIdea">Расчёт обновится по выбранной частоте</b></article>
+            <article class="crazy-card"><small>Автоматический набор</small><strong>Менеджер получает только состоявшийся звонок</strong><p>Единая очередь без регионов, система сама набирает номера и передаёт менеджеру ответившего клиента.</p><b id="dialIdea">Расчёт обновится по выбранному дозвону</b></article>
+            <article class="crazy-card"><small>Автоматизация</small><strong>КП и карточка клиента без ручной сборки</strong><p>Готовые данные, предложение и комментарий прямо в карточке звонка. Менеджер не прыгает между четырьмя системами.</p><b id="automationIdea">Расчёт обновится по выбранному времени цикла</b></article>
+            <article class="crazy-card"><small>Комбинация</small><strong id="comboIdeaTitle">Дозвон и быстрый цикл вместе</strong><p id="comboIdeaCopy">Расчёт покажет, сколько ставок КЦ нужно при улучшении обоих параметров.</p><b id="comboIdea">Сценарий пересчитается автоматически</b></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="product">
+        <div class="section-head">
+          <div class="section-no">07</div>
+          <div><h2>Продажи нового продукта — отдельная команда из 4 ставок</h2></div>
+          <p>Команда получает переданную клиентскую базу из другого подразделения, где с этими клиентами уже работают. Это передача ответственности за продажу нового продукта, а не параллельное подключение второго продавца.</p>
+        </div>
+        <div class="product-lane">
+          <article class="product-step"><small>1 · Передача базы</small><h3>Другое подразделение передаёт действующих клиентов</h3><p>Вместе с клиентом передаются история контактов, договорённости, ответственный и ближайшая задача.</p></article>
+          <div class="product-arrow">→</div>
+          <article class="product-step"><small>2 · Продажа нового продукта</small><h3>Отдельная команда из 4 ставок ведёт продажу</h3><p>Она отвечает за потребность, демонстрацию, расчёт, пилот, условия и результат по новому продукту.</p></article>
+          <div class="product-arrow">→</div>
+          <article class="product-step"><small>3 · Без двойной работы</small><h3>У каждого действия один ответственный</h3><p>Подразделения заранее делят продукты и задачи, чтобы клиенту не звонили два продавца с одним и тем же вопросом.</p></article>
+        </div>
+        <div class="fte-band"><strong>4 ставки</strong><span>Это заранее заданный размер команды внутри 38 текущих сотрудников. Объём передаваемой базы пока нужно подтвердить отдельно: без числа клиентов, стадии работы и частоты контактов нельзя доказать, что четырёх ставок достаточно.</span></div>
+      </section>
+
+      <section class="section" id="pilot">
+        <div class="section-head">
+          <div class="section-no">08</div>
+          <div><h2>Пилот вместо резкого изменения штата</h2></div>
+          <p>Шесть недель достаточно, чтобы проверить реальную нагрузку команды и ранние сигналы риска. Выручку сравниваем с похожей группой клиентов, для которой модель не меняли.</p>
+        </div>
+        <div class="pilot-grid">
+          <article class="pilot-card"><div class="week">Неделя 0</div><h3>Зафиксировать исходную точку</h3><p>Число ставок, попытки, дозвон, полное время на звонок, ручные операции, выручка, отток, промо, встречи и случаи передачи клиентов старшим менеджерам.</p><b>Выход: показатели до изменений</b></article>
+          <article class="pilot-card"><div class="week">Недели 1–2</div><h3>КЦ: чек ≤50 тыс. ₽ в атаке и ≤70 тыс. ₽ в защите</h3><p>Запустить федеральную очередь на наименее рискованной части. Сравнить нагрузку с контрольной группой.</p><b>Выход: реальный полный цикл звонка</b></article>
+          <article class="pilot-card"><div class="week">Недели 3–4</div><h3>Проверить, после какой суммы нужен личный менеджер</h3><p>В стабильных регионах сравнить 70 и 80 тыс. ₽. В регионах с падающей долей сохранить 50 тыс. ₽. Порог 100 тыс. ₽ использовать только как стресс-сценарий нагрузки КЦ.</p><b>Выход: безопасный порог личного ведения</b></article>
+          <article class="pilot-card"><div class="week">Недели 5–6</div><h3>Решение по масштабу</h3><p>Выбрать: расширить модель, оставить только часть сегментов или вернуть клиентов к прежнему способу ведения. После этого принимать решение о числе ставок.</p><b>Выход: расчёт для решения</b></article>
+        </div>
+        <div class="overlay-rule"><b>Что означает передача в S3:</b> если в КЦ обнаружен риск потери выручки, сложная ситуация или высокий потенциал клиента, оператор фиксирует причину и следующую задачу. Конкретный S3 принимает клиента в работу в течение одного рабочего дня. Это смена способа ведения клиента, а не техническая «эскалация».</div>
+        <div class="stop-rules">
+          <div><b>Не расширяем пилот по деньгам</b>Если выручка или удержание хуже контрольной группы больше согласованного допуска, новые группы в КЦ не добавляем, затронутых клиентов возвращаем персональным менеджерам.</div>
+          <div><b>Не расширяем пилот по нагрузке</b>Если две недели подряд команда не выполняет план контактов или очередь продолжает расти, сначала уменьшаем базу КЦ либо добавляем мощность.</div>
+          <div><b>Возвращаем клиента в личное ведение</b>Если растут жалобы и повторные обращения либо S3 не принимает переданного клиента за один рабочий день, клиент возвращается персональному менеджеру.</div>
+        </div>
+      </section>
+
+      <section class="section" id="sources">
+        <div class="section-head">
+          <div class="section-no">09</div>
+          <div><h2>Откуда взялись цифры</h2></div>
+          <p>Каждый источник отвечает только на свой вопрос. Здесь указано, что именно он доказывает, чего не доказывает и почему использован.</p>
+        </div>
+        <div class="sources">
+          <article class="source-card"><small>1 · Сколько у нас клиентов и сотрудников</small><strong>Клиентская выгрузка от 20.07.2026 + уточнение команды</strong><p><b>Что даёт выгрузка:</b> 7 385 клиентов всего, 6 886 клиентов M/L, месячные траты, промо, регион и закрепление.<br><b>Что даёт уточнение команды:</b> 38 сотрудников — Фармеры 2: 8, Фармеры 4: 8, Фармеры 5: 6, KAM: 7, MASD: 9. 42 имени в файле не считаем действующим штатом.</p></article>
+          <article class="source-card"><small>2 · Сколько времени занимает работа</small><strong>Исследование рабочего дня · 4 менеджера</strong><p><b>Что даёт:</b> доля разговора 29–57%, поиск данных 1–3 минуты, ручное КП до 5–15 минут. В CRM-сверке есть разделение исходящих и входящих, а в отчёте отмечено отключение входящих одним менеджером — значит, этот поток нельзя игнорировать.<br><b>Ограничение:</b> стабильного объёма входящих на сотрудника исследование не даёт. Используем отдельный редактируемый резерв времени, а не выдаём его за норму.</p><a href="https://docs.google.com/document/d/1ZjHubbm8XeHvc3YbKrxeIaECwsr7XidIrUAJk9w3FK8/edit?tab=t.0" target="_blank" rel="noopener">Открыть исследование ↗</a></article>
+          <article class="source-card"><small>3 · Сколько стоит одна ставка</small><strong>Витрина затрат по ролям · февраль 2026</strong><p><b>Что даёт:</b> полную месячную стоимость S2 — 323,6 тыс. ₽, S3 — 393,9 тыс. ₽, RSM — 450,0 тыс. ₽, KAM — 408,1–797,3 тыс. ₽.<br><b>Почему февраль:</b> это последний месяц в доступной витрине, где роли разделены. Более свежий майский расчёт смешивает команды и показывает 76/41 человек по всей RE, поэтому здесь не используется.</p><a href="https://redash.k.avito.ru/queries/108072" target="_blank" rel="noopener">Открыть витрину ↗</a></article>
+          <article class="source-card"><small>4 · Может ли помочь предиктивный набор</small><strong>Сравнение двух дней одного менеджера</strong><p><b>Что даёт:</b> пример более плотного обзвона; медиана разговора изменилась со 174 до 82 секунд.<br><b>Ограничение:</b> один менеджер и два дня. Это причина проверить инструмент в пилоте, но не доказанная экономия.</p></article>
+          <article class="source-card"><small>5 · Откуда взялась логика сегментов</small><strong>Исходное исследование клиентских баз</strong><p><b>Что даёт:</b> прежнюю логику распределения клиентов по чекам и способам работы.<br><b>Что изменили здесь:</b> добавили цель сокращения затрат, отдельную команду продаж нового продукта из 4 ставок, передачу ей базы из другого подразделения и разные границы личного ведения по регионам.</p><a href="https://docs.google.com/document/d/1I7cp49rsW6knZLo4Hon_P4xlEzwtsXhi6wimUyy66Wo/edit?tab=t.0" target="_blank" rel="noopener">Открыть исходное исследование ↗</a></article>
+          <article class="source-card"><small>6 · Что пока является допущением</small><strong>Параметры калькулятора</strong><p><b>Не факт, а сценарий:</b> 7 минут на попытку, 35% дозвона, 270 минут на всю телефонную работу и оформление, из них 30 минут резервируем на входящие, 100 клиентов на S3 и 35 на KAM/RSM.<br><b>Зачем нужны:</b> увидеть, при каких условиях 28, 26, 24 или 22 ставки смогут покрывать базу. Все параметры можно менять прямо на странице.</p></article>
+        </div>
+        <div class="method"><b>Как читать расчёт:</b> клиентская база и февральская стоимость ролей — наблюдаемые данные. 38 сотрудников — уточнение команды. Производительность, частота контактов и экономия 7,8–23,3 млн ₽ — гипотезы, которые нужно подтвердить на пилоте до сокращения ставок.</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const fmt0 = new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 0});
+    const fmt1 = new Intl.NumberFormat('ru-RU', {minimumFractionDigits: 1, maximumFractionDigits: 2});
+    const regionData = /* REGION_DATA_START */[{"name":"Адыгея","attack":false,"bins":[[0,0,0],[15,323239,11],[0,0,0],[0,0,0],[0,0,0],[1,106556,1],[3,621904,3],[0,0,0]]},{"name":"Алтайский край","attack":false,"bins":[[0,0,0],[34,687353,27],[8,494732,8],[1,78907,1],[6,532623,6],[3,399251,3],[6,1153049,6],[1,502137,1]]},{"name":"Амурская область","attack":false,"bins":[[0,0,0],[25,534230,23],[4,214351,4],[2,143609,2],[0,0,0],[4,486298,4],[2,350569,2],[2,688384,2]]},{"name":"Архангельская область","attack":false,"bins":[[1,0,0],[27,635313,26],[5,293363,5],[4,301278,4],[2,176989,2],[4,491386,4],[1,213242,1],[0,0,0]]},{"name":"Астраханская область","attack":false,"bins":[[0,0,0],[22,603867,21],[8,488945,7],[1,77845,1],[6,545400,6],[5,551122,5],[3,563747,3],[0,0,0]]},{"name":"Башкортостан","attack":false,"bins":[[0,0,0],[118,2705917,110],[19,1137740,19],[3,223481,3],[15,1345362,15],[10,1216382,10],[5,1185329,5],[5,2551887,5]]},{"name":"Белгородская область","attack":false,"bins":[[0,0,0],[50,1084807,48],[11,636186,11],[1,76379,1],[1,88644,1],[5,609158,5],[3,618838,3],[1,400704,1]]},{"name":"Брянская область","attack":false,"bins":[[0,0,0],[27,523851,27],[6,368837,6],[0,0,0],[1,82034,1],[3,327813,3],[2,325492,2],[1,412550,1]]},{"name":"Бурятия","attack":false,"bins":[[1,0,0],[12,176100,12],[5,300198,5],[0,0,0],[1,83424,1],[1,106444,1],[0,0,0],[2,987946,2]]},{"name":"Владимирская область","attack":false,"bins":[[0,0,0],[66,1491319,64],[6,360671,6],[4,298531,4],[2,176343,2],[3,391804,3],[4,875343,4],[4,2068601,4]]},{"name":"Волгоградская область","attack":false,"bins":[[1,0,1],[82,1765680,70],[10,560374,10],[3,221804,3],[4,365171,3],[5,546354,5],[4,822421,4],[2,1807035,2]]},{"name":"Вологодская область","attack":false,"bins":[[0,0,0],[28,614958,26],[4,225342,4],[1,70321,1],[0,0,0],[1,145693,1],[4,741551,4],[1,390466,1]]},{"name":"Воронежская область","attack":false,"bins":[[2,0,1],[95,1895512,91],[13,772187,13],[5,374096,5],[3,274194,3],[4,514814,4],[2,342435,2],[3,1798272,3]]},{"name":"Дагестан","attack":false,"bins":[[1,0,0],[38,829573,32],[2,127196,2],[1,74091,1],[0,0,0],[6,652853,5],[5,874060,5],[1,397702,1]]},{"name":"другой регион","attack":false,"bins":[[0,0,0],[6,106186,5],[0,0,0],[1,70616,1],[1,80029,1],[0,0,0],[0,0,0],[0,0,0]]},{"name":"Еврейская АО","attack":false,"bins":[[0,0,0],[3,67626,3],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},{"name":"Забайкальский край","attack":false,"bins":[[0,0,0],[9,202884,9],[1,52796,1],[0,0,0],[1,99094,1],[1,105472,1],[3,514860,3],[1,335780,1]]},{"name":"Ивановская область","attack":false,"bins":[[0,0,0],[27,608680,26],[6,365222,6],[4,303100,4],[0,0,0],[1,117993,1],[2,367614,2],[2,1160145,2]]},{"name":"Ингушетия","attack":false,"bins":[[0,0,0],[1,34501,1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},{"name":"Иркутская область","attack":false,"bins":[[5,0,1],[89,2029710,83],[16,952862,16],[7,521725,7],[9,835287,9],[3,356772,3],[11,2259149,11],[2,1416300,2]]},{"name":"Кабардино-Балкария","attack":false,"bins":[[1,0,0],[14,332353,11],[2,122545,2],[0,0,0],[0,0,0],[1,105026,1],[3,713826,3],[1,549459,1]]},{"name":"Калининградская область","attack":false,"bins":[[1,0,0],[61,1374097,60],[7,419343,5],[3,227106,3],[2,193882,2],[7,829689,7],[6,1278556,6],[6,2762064,6]]},{"name":"Калмыкия","attack":false,"bins":[[2,0,0],[4,131469,4],[3,202507,3],[0,0,0],[1,93884,1],[1,120435,1],[0,0,0],[0,0,0]]},{"name":"Калужская область","attack":false,"bins":[[5,0,0],[52,1067975,47],[4,248514,4],[6,443667,6],[3,255978,3],[7,836448,6],[5,1029742,5],[1,487295,1]]},{"name":"Камчатский край","attack":false,"bins":[[0,0,0],[9,296401,8],[2,120141,2],[0,0,0],[0,0,0],[0,0,0],[1,185426,1],[0,0,0]]},{"name":"Карачаево-Черкесия","attack":false,"bins":[[0,0,0],[3,58557,3],[0,0,0],[0,0,0],[1,84714,1],[1,100284,1],[0,0,0],[0,0,0]]},{"name":"Карелия","attack":false,"bins":[[0,0,0],[12,269264,11],[2,119271,2],[1,74836,1],[0,0,0],[0,0,0],[2,547929,2],[1,334834,1]]},{"name":"Кемеровская область","attack":false,"bins":[[1,0,0],[75,1545268,62],[6,350288,6],[3,227149,3],[4,346958,4],[2,246441,2],[2,499100,2],[4,2811901,4]]},{"name":"Кировская область","attack":false,"bins":[[0,0,0],[23,631996,23],[4,229133,4],[1,79977,1],[2,166983,2],[0,0,0],[0,0,0],[3,1053897,3]]},{"name":"Коми","attack":false,"bins":[[1,0,0],[10,206849,8],[2,118722,2],[1,74842,1],[1,97458,1],[1,133885,1],[0,0,0],[1,362831,1]]},{"name":"Костромская область","attack":false,"bins":[[1,0,0],[22,489144,22],[4,221993,4],[1,72488,1],[0,0,0],[2,236744,2],[1,170812,1],[2,998650,2]]},{"name":"Краснодарский край","attack":true,"bins":[[15,0,1],[385,7905625,347],[35,2061055,35],[17,1283489,17],[22,2024928,22],[25,3181962,25],[36,7414712,36],[12,7218143,12]]},{"name":"Красноярский край","attack":false,"bins":[[1,0,1],[96,1992545,92],[8,484835,8],[4,299891,4],[3,273985,3],[6,730341,6],[3,680363,3],[2,1339960,2]]},{"name":"Крым","attack":false,"bins":[[10,0,4],[170,2915830,157],[16,922766,16],[6,449053,6],[3,254370,3],[8,1038055,8],[11,2237824,11],[1,462659,1]]},{"name":"Курганская область","attack":false,"bins":[[0,0,0],[9,218207,9],[0,0,0],[0,0,0],[1,88569,1],[1,100488,1],[2,349353,2],[1,387783,1]]},{"name":"Курская область","attack":false,"bins":[[0,0,0],[18,433042,18],[4,252067,4],[0,0,0],[1,80360,1],[4,461345,4],[1,158052,1],[1,448573,1]]},{"name":"Ленинградская область","attack":true,"bins":[[1,0,0],[37,736419,34],[4,222759,4],[5,373686,5],[2,177060,2],[3,389079,3],[2,446418,2],[0,0,0]]},{"name":"Липецкая область","attack":false,"bins":[[1,0,0],[36,719013,36],[1,53531,1],[0,0,0],[0,0,0],[0,0,0],[2,510784,2],[2,743714,2]]},{"name":"Магаданская область","attack":false,"bins":[[0,0,0],[5,121614,5],[0,0,0],[1,75576,1],[0,0,0],[1,126486,1],[0,0,0],[0,0,0]]},{"name":"Марий Эл","attack":false,"bins":[[0,0,0],[18,476152,18],[6,335481,6],[3,224427,3],[0,0,0],[3,369395,3],[3,547570,3],[0,0,0]]},{"name":"Мордовия","attack":false,"bins":[[0,0,0],[16,369820,16],[3,180512,3],[0,0,0],[2,174254,2],[1,118274,1],[1,172023,1],[0,0,0]]},{"name":"Москва","attack":true,"bins":[[29,0,3],[324,6052870,303],[46,2684446,46],[5,376703,5],[17,1548622,17],[20,2512934,20],[22,4536719,22],[15,17651243,15]]},{"name":"Москва и Московская область","attack":true,"bins":[[0,0,0],[8,169401,8],[2,113754,2],[0,0,0],[0,0,0],[2,226774,2],[0,0,0],[0,0,0]]},{"name":"Московская область","attack":true,"bins":[[15,0,2],[364,7914912,347],[69,4111664,68],[23,1711322,23],[24,2103599,24],[37,4470083,37],[26,5141917,26],[8,4890442,7]]},{"name":"Мурманская область","attack":false,"bins":[[0,0,0],[22,360324,20],[2,124548,2],[2,143242,2],[1,86279,1],[1,115080,1],[1,243122,1],[0,0,0]]},{"name":"Нижегородская область","attack":false,"bins":[[1,0,1],[80,2016641,77],[3,169145,3],[1,70528,1],[7,591060,7],[7,906434,7],[2,584833,2],[2,1656194,2]]},{"name":"Новгородская область","attack":false,"bins":[[0,0,0],[26,597369,26],[4,238691,4],[1,75833,1],[3,270395,3],[0,0,0],[0,0,0],[0,0,0]]},{"name":"Новосибирская область","attack":true,"bins":[[4,0,3],[123,2239835,122],[9,517284,9],[3,232926,3],[1,95707,1],[6,772267,6],[1,167396,1],[5,3999773,5]]},{"name":"Омская область","attack":false,"bins":[[0,0,0],[57,1125790,57],[3,154048,3],[0,0,0],[1,84499,1],[2,246129,2],[1,198565,1],[2,670542,2]]},{"name":"Оренбургская область","attack":false,"bins":[[0,0,0],[54,1083325,53],[10,565407,10],[3,227957,3],[4,373348,4],[9,1074603,9],[3,742256,3],[2,1066007,2]]},{"name":"Орловская область","attack":false,"bins":[[0,0,0],[18,468294,18],[1,67770,1],[0,0,0],[0,0,0],[2,270995,2],[1,213425,1],[0,0,0]]},{"name":"Пензенская область","attack":false,"bins":[[3,0,0],[40,900997,37],[6,359976,6],[2,154008,2],[1,94952,1],[2,261658,2],[1,187148,1],[1,414992,1]]},{"name":"Пермский край","attack":false,"bins":[[0,0,0],[62,1389521,59],[10,623520,10],[8,594628,8],[2,175787,2],[1,101906,1],[3,786199,3],[3,1156944,3]]},{"name":"Приморский край","attack":false,"bins":[[2,0,1],[19,32169,18],[0,0,0],[0,0,0],[1,81958,1],[0,0,0],[1,206316,1],[0,0,0]]},{"name":"Псковская область","attack":false,"bins":[[1,0,1],[12,308275,10],[0,0,0],[2,149451,2],[1,89205,1],[0,0,0],[1,187434,1],[0,0,0]]},{"name":"Республика Алтай","attack":false,"bins":[[0,0,0],[5,143525,4],[3,195389,3],[1,73124,1],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},{"name":"Ростовская область","attack":false,"bins":[[5,0,0],[230,5178275,223],[21,1232736,21],[8,602475,8],[13,1176829,13],[20,2509529,20],[18,3745812,18],[13,6486220,13]]},{"name":"Рязанская область","attack":false,"bins":[[1,0,0],[51,1060408,50],[5,286485,4],[1,73588,1],[1,93195,1],[1,116780,1],[4,970511,4],[3,2056747,3]]},{"name":"Самарская область","attack":false,"bins":[[3,0,0],[80,1747425,75],[6,353463,6],[4,289490,4],[3,249386,3],[5,586809,4],[5,931034,5],[1,444330,1]]},{"name":"Санкт-Петербург","attack":true,"bins":[[2,0,1],[207,4688797,201],[26,1523575,26],[9,668129,9],[10,880603,10],[16,1859776,16],[14,2617830,14],[15,8054351,15]]},{"name":"Санкт-Петербург и Ленинградская область","attack":true,"bins":[[0,0,0],[2,33904,2],[1,55532,1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},{"name":"Саратовская область","attack":false,"bins":[[2,0,1],[80,1840407,79],[7,436740,7],[3,231712,3],[2,166662,2],[5,607112,5],[2,423952,2],[2,839006,2]]},{"name":"Саха (Якутия)","attack":false,"bins":[[0,0,0],[3,49209,3],[2,116488,2],[1,73336,1],[0,0,0],[1,102865,1],[0,0,0],[0,0,0]]},{"name":"Свердловская область","attack":false,"bins":[[3,0,1],[185,3832875,184],[16,935801,16],[1,73158,1],[8,685476,8],[4,518860,4],[6,1146820,6],[1,387125,1]]},{"name":"Северная Осетия","attack":false,"bins":[[2,0,0],[18,421399,15],[3,179858,3],[1,78082,1],[0,0,0],[2,274075,2],[0,0,0],[1,303057,1]]},{"name":"Смоленская область","attack":false,"bins":[[0,0,0],[23,435036,23],[3,174167,3],[2,145384,2],[1,99186,1],[2,222741,2],[1,221852,1],[1,330989,1]]},{"name":"Ставропольский край","attack":false,"bins":[[1,0,0],[129,2922254,117],[16,945875,16],[6,448333,6],[8,707087,8],[12,1421974,12],[10,1892366,10],[3,2136095,3]]},{"name":"Тамбовская область","attack":false,"bins":[[2,0,0],[22,396975,22],[5,283938,5],[0,0,0],[2,168270,2],[2,228849,2],[0,0,0],[1,463710,1]]},{"name":"Татарстан","attack":false,"bins":[[5,0,0],[148,3165616,139],[21,1245934,21],[5,366734,5],[11,1003507,11],[17,2011514,17],[18,3630768,18],[7,4379263,7]]},{"name":"Тверская область","attack":false,"bins":[[1,0,0],[46,901600,45],[9,524363,9],[2,145983,2],[2,174249,2],[0,0,0],[1,242292,1],[1,414704,1]]},{"name":"Томская область","attack":false,"bins":[[0,0,0],[15,358031,15],[2,124259,1],[0,0,0],[4,355459,4],[0,0,0],[3,592558,3],[1,512346,1]]},{"name":"Тульская область","attack":false,"bins":[[1,0,0],[45,979697,44],[5,303330,5],[1,70988,1],[3,271327,3],[3,333707,3],[2,420364,2],[2,988512,2]]},{"name":"Тюменская область","attack":false,"bins":[[1,0,0],[79,1485009,72],[4,255657,4],[0,0,0],[0,0,0],[5,617298,5],[2,364578,2],[4,6675071,4]]},{"name":"Удмуртия","attack":false,"bins":[[0,0,0],[36,857679,34],[6,352816,6],[0,0,0],[3,274994,3],[3,404588,3],[3,554733,3],[3,1543724,3]]},{"name":"Ульяновская область","attack":false,"bins":[[0,0,0],[25,623849,24],[3,190945,3],[1,73488,1],[4,354201,4],[1,124620,1],[5,1246718,5],[0,0,0]]},{"name":"Хабаровский край","attack":false,"bins":[[0,0,0],[22,555929,22],[6,362029,6],[1,78230,1],[2,171191,2],[1,104449,1],[3,626542,3],[1,474879,1]]},{"name":"Хакасия","attack":false,"bins":[[0,0,0],[19,371065,17],[3,185579,3],[3,228798,3],[2,174627,2],[2,261293,2],[2,433774,2],[0,0,0]]},{"name":"Ханты-Мансийский АО","attack":false,"bins":[[2,0,1],[59,1363963,57],[6,341882,6],[0,0,0],[5,453180,5],[1,121564,1],[4,858492,4],[1,740344,1]]},{"name":"Челябинская область","attack":false,"bins":[[4,0,0],[118,2740090,118],[14,820690,13],[4,292898,4],[6,547563,5],[12,1496949,12],[9,2104370,9],[5,1772262,5]]},{"name":"Чеченская Республика","attack":false,"bins":[[1,0,0],[11,237124,7],[1,52097,1],[1,70556,1],[1,92308,1],[2,275550,2],[0,0,0],[0,0,0]]},{"name":"Чувашия","attack":false,"bins":[[1,0,0],[39,827317,38],[6,349779,6],[0,0,0],[0,0,0],[2,229593,2],[2,401974,2],[1,405054,1]]},{"name":"Ямало-Ненецкий АО","attack":false,"bins":[[0,0,0],[15,391681,14],[2,115678,2],[0,0,0],[0,0,0],[2,234139,2],[0,0,0],[1,351169,1]]},{"name":"Ярославская область","attack":false,"bins":[[2,0,0],[68,1518924,66],[6,356193,6],[2,148007,2],[1,90518,1],[1,138408,1],[4,836485,4],[2,1177836,2]]}]/* REGION_DATA_END */;
+
+    const els = {
+      fte: document.getElementById('fte'),
+      minutes: document.getElementById('minutes'),
+      inbound: document.getElementById('inbound'),
+      cycle: document.getElementById('cycle'),
+      connect: document.getElementById('connect'),
+      target: document.getElementById('target'),
+      s3Portfolio: document.getElementById('s3Portfolio'),
+      seniorPortfolio: document.getElementById('seniorPortfolio')
+    };
+
+    let queue = 5391;
+    let s3Queue = 1176;
+    let seniorQueue = 174;
+    let s3WorkloadQueue = 1176;
+    let seniorWorkloadQueue = 174;
+    const workDays = 20;
+    const currentFte = 38;
+    const productFte = 4;
+    const availableBauFte = currentFte - productFte;
+    let requiredFteNow = 20;
+
+    function setText(id, value) {
+      const node = document.getElementById(id);
+      if (node) node.textContent = value;
+    }
+
+    function setRisk(id, gap) {
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.className = 'risk-pill ' + (gap >= 2 ? 'low' : gap >= 0 ? 'medium' : 'high');
+      node.textContent = gap >= 2 ? 'запас' : gap >= 0 ? 'на грани' : 'дефицит';
+    }
+
+    const bandLabels = [
+      '0 ₽',
+      '>0–50 тыс. ₽',
+      '>50–70 тыс. ₽',
+      '>70–80 тыс. ₽',
+      '>80–100 тыс. ₽',
+      '>100–150 тыс. ₽',
+      '>150–300 тыс. ₽',
+      '>300 тыс. ₽'
+    ];
+
+    const baseRegionFilter = document.getElementById('baseRegionFilter');
+    const regionFilter = document.getElementById('regionFilter');
+    const baseThreshold = document.getElementById('baseThreshold');
+    const defenseThreshold = document.getElementById('defenseThreshold');
+    const regionalSort = document.getElementById('regionalSort');
+    const attackIntensity = document.getElementById('attackIntensity');
+
+    function thresholdIndex(threshold) {
+      return threshold === 70000 ? 2 : threshold === 80000 ? 3 : 4;
+    }
+
+    function summarizeRegions(regions, threshold) {
+      const total = {
+        total: 0, auto: 0, kc: 0, personal: 0, s3: 0, senior: 0,
+        spend: 0, kcSpend: 0, personalSpend: 0, promo: 0
+      };
+      const defenseLimit = thresholdIndex(threshold);
+
+      regions.forEach((region) => {
+        const limit = region.attack ? 1 : defenseLimit;
+        region.bins.forEach((bin, index) => {
+          const [count, spend, promo] = bin;
+          total.total += count;
+          total.spend += spend;
+          total.promo += promo;
+          if (index === 0) {
+            total.auto += count;
+          } else if (index <= limit) {
+            total.kc += count;
+            total.kcSpend += spend;
+          } else {
+            total.personal += count;
+            total.personalSpend += spend;
+            if (index === 7) total.senior += count;
+            else total.s3 += count;
+          }
+        });
+      });
+      return total;
+    }
+
+    function summarizeOneRegion(region, threshold) {
+      return { ...summarizeRegions([region], threshold), region };
+    }
+
+    function selectedRegions() {
+      const selected = baseRegionFilter?.value || '';
+      return selected ? regionData.filter((region) => region.name === selected) : regionData;
+    }
+
+    function syncSelects(source, target) {
+      if (source && target && target.value !== source.value) target.value = source.value;
+    }
+
+    function renderBaseTable(threshold) {
+      const regions = selectedRegions();
+      const defenseLimit = thresholdIndex(threshold);
+      const rows = bandLabels.map((label, index) => {
+        const item = { label, count: 0, spend: 0, promo: 0, auto: 0, kc: 0, personal: 0 };
+        regions.forEach((region) => {
+          const [count, spend, promo] = region.bins[index];
+          const limit = region.attack ? 1 : defenseLimit;
+          item.count += count;
+          item.spend += spend;
+          item.promo += promo;
+          if (index === 0) item.auto += count;
+          else if (index <= limit) item.kc += count;
+          else item.personal += count;
+        });
+        return item;
+      });
+
+      const tbody = document.getElementById('baseTableBody');
+      tbody.innerHTML = rows.map((row) => {
+        const routeValue = (value, type) => value
+          ? `<span class="base-route-value ${type}">${fmt0.format(value)}</span>`
+          : '—';
+        return `<tr>
+          <td>${row.label}/мес.</td>
+          <td>${fmt0.format(row.count)}</td>
+          <td>${fmt1.format(row.spend / 1000000)}</td>
+          <td>${fmt0.format(row.promo)}</td>
+          <td>${routeValue(row.auto, 'auto')}</td>
+          <td>${routeValue(row.kc, 'kc')}</td>
+          <td>${routeValue(row.personal, 'personal')}</td>
+        </tr>`;
+      }).join('');
+
+      const summary = summarizeRegions(regions, threshold);
+      const selectedName = baseRegionFilter?.value;
+      const scope = selectedName || 'Все регионы';
+      const personalShare = summary.spend ? summary.personalSpend / summary.spend * 100 : 0;
+      document.getElementById('baseSnapshot').innerHTML =
+        `<b>${scope}:</b> ${fmt0.format(summary.kc)} клиентов идут в телефонную команду, ` +
+        `${fmt0.format(summary.personal)} остаются в личном ведении и сохраняют ` +
+        `${fmt1.format(summary.personalSpend / 1000000)} млн ₽, или ${fmt1.format(personalShare)}% трат. ` +
+        `${fmt0.format(summary.auto)} клиентов с нулевыми тратами получают автоматические сообщения.`;
+    }
+
+    function renderRegionalPlanning(threshold) {
+      const selected = baseRegionFilter?.value || '';
+      const regions = selected ? regionData.filter((region) => region.name === selected) : regionData;
+      const summary = summarizeRegions(regions, threshold);
+      const selectedRegion = regions.length === 1 ? regions[0] : null;
+      const intensity = Number(attackIntensity?.value || 1.25);
+      const rows = regionData.map((region) => summarizeOneRegion(region, threshold));
+      const rowsInScope = selected ? rows.filter((row) => row.region.name === selected) : rows;
+      const roleFactor = (row) => row.region.attack ? intensity : 1;
+      const s3Load = rowsInScope.reduce((sum, row) => sum + row.s3 / 100 * roleFactor(row), 0);
+      const seniorLoad = rowsInScope.reduce((sum, row) => sum + row.senior / 35 * roleFactor(row), 0);
+      setText('regionTotal', fmt0.format(summary.total));
+      setText('regionType', selectedRegion ? (selectedRegion.attack ? 'доля падает' : 'доля стабильна') : 'все регионы');
+      setText('regionKc', fmt0.format(summary.kc));
+      setText('regionKcFte', '≈' + fmt1.format(summary.kc / 265) + ' ставки S2 / КЦ');
+      setText('regionPersonal', fmt0.format(summary.personal));
+      setText('regionS3Fte', '≈' + fmt1.format(s3Load) + ' ставки S3 с учётом плотности работы');
+      setText('regionSenior', fmt0.format(summary.senior));
+      setText('regionSeniorFte', '≈' + fmt1.format(seniorLoad) + ' ставки KAM / RSM с учётом плотности работы');
+
+      const sortMode = regionalSort?.value || 'senior';
+      const metric = (row) => {
+        if (sortMode === 'kc') return row.kc / 265;
+        if (sortMode === 'personalSpend') return row.personalSpend;
+        if (sortMode === 'total') return row.total;
+        return (row.s3 / 100 + row.senior / 35) * roleFactor(row);
+      };
+      const visible = rowsInScope
+        .sort((a, b) => metric(b) - metric(a))
+        .slice(0, selected ? 1 : 15);
+
+      document.getElementById('regionalTableBody').innerHTML = visible.map((row) => `
+        <tr>
+          <td><b>${row.region.name}</b><span>${row.region.attack ? 'доля падает · личный менеджер после 50 тыс. ₽ · времени +' + fmt0.format((intensity - 1) * 100) + '%' : 'доля стабильна · личный менеджер после ' + fmt0.format(threshold / 1000) + ' тыс. ₽'}</span></td>
+          <td>${fmt0.format(row.total)}</td>
+          <td>${fmt0.format(row.kc)}</td>
+          <td>${fmt0.format(row.personal)}</td>
+          <td>${fmt1.format(row.personalSpend / 1000000)}</td>
+          <td class="fte-cell">${fmt1.format(row.kc / 265)}</td>
+          <td class="senior-cell">${fmt1.format(row.s3 / 100 * roleFactor(row))}</td>
+          <td class="senior-cell">${fmt1.format(row.senior / 35 * roleFactor(row))}</td>
+        </tr>
+      `).join('');
+    }
+
+    function updateGlobalThreshold(threshold) {
+      const all = summarizeRegions(regionData, threshold);
+      const defense = summarizeRegions(regionData.filter((region) => !region.attack), threshold);
+      queue = all.kc;
+      s3Queue = all.s3;
+      seniorQueue = all.senior;
+      const intensity = Number(attackIntensity?.value || 1.25);
+      const workloadRows = regionData.map((region) => summarizeOneRegion(region, threshold));
+      s3WorkloadQueue = workloadRows.reduce(
+        (sum, row) => sum + row.s3 * (row.region.attack ? intensity : 1),
+        0
+      );
+      seniorWorkloadQueue = workloadRows.reduce(
+        (sum, row) => sum + row.senior * (row.region.attack ? intensity : 1),
+        0
+      );
+
+      const personalShare = all.spend ? all.personalSpend / all.spend * 100 : 0;
+      setText('heroQueue', fmt0.format(all.kc));
+      setText('heroPersonal', fmt0.format(all.personal));
+      setText('heroThreshold', fmt0.format(threshold / 1000));
+      setText('decisionQueue', fmt0.format(all.kc));
+      setText('decisionPersonal', fmt0.format(all.personal));
+      setText('decisionShare', fmt1.format(personalShare) + '%');
+      setText('modelKcCount', fmt0.format(all.kc));
+      setText('modelKcShare', fmt1.format(all.kc / all.total * 100) + '% базы · телефонная команда S2 / КЦ');
+      setText('modelPersonalCount', fmt0.format(all.personal));
+      setText('modelPersonalShare', fmt1.format(all.personal / all.total * 100) + '% базы · ' + fmt1.format(personalShare) + '% трат');
+      setText('boundaryDefenseTitle', 'Личный менеджер после ' + fmt0.format(threshold / 1000) + ' тыс. ₽');
+      setText('boundaryDefenseCopy', 'До ' + fmt0.format(threshold / 1000) + ' тыс. ₽ — телефонная команда; выше — S3, RSM или KAM.');
+      setText('defenseKcCount', fmt0.format(defense.kc));
+      setText('defensePersonalCount', fmt0.format(defense.personal));
+      setText('defenseKcLimit', fmt0.format(threshold / 1000) + ' тыс.');
+      setText('defenseRoleTitle', 'Личный менеджер — после ' + fmt0.format(threshold / 1000) + ' тыс. ₽');
+      const defenseLimit = thresholdIndex(threshold);
+      const defenseMidPersonal = defenseLimit < 5
+        ? regionData.filter((region) => !region.attack).reduce(
+            (sum, region) => sum + region.bins.slice(defenseLimit + 1, 7).reduce((acc, bin) => acc + bin[0], 0),
+            0
+          )
+        : 0;
+      const defenseSeniorPersonal = regionData.filter((region) => !region.attack).reduce(
+        (sum, region) => sum + region.bins.slice(7).reduce((acc, bin) => acc + bin[0], 0),
+        0
+      );
+      const defensePersonalShare = defense.total ? defense.personal / defense.total * 100 : 0;
+      setText('defenseMidPersonal', fmt0.format(defenseMidPersonal));
+      setText('defenseSeniorPersonal', fmt0.format(defenseSeniorPersonal));
+      setText('defensePersonalShare', fmt0.format(defensePersonalShare) + '%');
+      setText(
+        'defenseDescription',
+        'Здесь лично ведём ' + fmt0.format(defensePersonalShare) +
+        '% базы: телефонная команда получает больше клиентов, потому что рыночная позиция стабильна.'
+      );
+      setText(
+        'workforceScenario',
+        'Стабильные регионы: личный менеджер подключается после ' +
+        fmt0.format(threshold / 1000) + ' тыс. ₽; в атаке — после 50 тыс. ₽'
+      );
+      setText('kcQueueRole', fmt0.format(all.kc));
+      setText('s3QueueRole', fmt0.format(all.s3));
+
+      renderBaseTable(threshold);
+      renderRegionalPlanning(threshold);
+      updateCapacity();
+    }
+
+    function initializeRegionalControls() {
+      const options = ['<option value="">Все регионы</option>']
+        .concat(regionData.map((region) => `<option value="${region.name}">${region.name}</option>`))
+        .join('');
+      if (baseRegionFilter) baseRegionFilter.innerHTML = options;
+      if (regionFilter) regionFilter.innerHTML = options;
+
+      [baseRegionFilter, regionFilter].filter(Boolean).forEach((select) => {
+        select.addEventListener('change', () => {
+          syncSelects(select, select === baseRegionFilter ? regionFilter : baseRegionFilter);
+          const threshold = Number(baseThreshold?.value || defenseThreshold?.value || 80000);
+          renderBaseTable(threshold);
+          renderRegionalPlanning(threshold);
+        });
+      });
+
+      [baseThreshold, defenseThreshold].filter(Boolean).forEach((select) => {
+        select.addEventListener('change', () => {
+          syncSelects(select, select === baseThreshold ? defenseThreshold : baseThreshold);
+          updateGlobalThreshold(Number(select.value));
+        });
+      });
+
+      regionalSort?.addEventListener('change', () => {
+        renderRegionalPlanning(Number(baseThreshold?.value || 80000));
+      });
+      attackIntensity?.addEventListener('change', () => {
+        updateGlobalThreshold(Number(baseThreshold?.value || 80000));
+      });
+    }
+
+    function updateCapacity() {
+      const fte = Number(els.fte.value);
+      const minutes = Number(els.minutes.value);
+      const inboundMinutes = Math.min(minutes, Number(els.inbound.value));
+      const outboundMinutes = Math.max(1, minutes - inboundMinutes);
+      const cycle = Number(els.cycle.value);
+      const connect = Number(els.connect.value) / 100;
+      const target = Number(els.target.value);
+
+      const attempts = fte * outboundMinutes * workDays / cycle;
+      const live = attempts * connect;
+      const attemptCoverage = attempts / queue;
+      const liveCoverage = live / queue;
+      const requiredAttempts = queue * target / connect;
+      const requiredFte = Math.ceil(requiredAttempts * cycle / (outboundMinutes * workDays));
+      requiredFteNow = requiredFte;
+
+      setText('fteOut', fmt0.format(fte) + ' ставок');
+      setText('minutesOut', fmt0.format(minutes) + ' мин');
+      setText('inboundOut', fmt0.format(inboundMinutes) + ' мин');
+      setText('inboundEvidence', fmt0.format(inboundMinutes) + ' мин');
+      setText('cycleOut', fmt1.format(cycle) + ' мин');
+      setText('connectOut', fmt0.format(connect * 100) + '%');
+      setText('targetOut', fmt1.format(target) + (target === 1 ? ' раз' : ' раза'));
+      setText('attempts', fmt0.format(attempts));
+      setText('liveContacts', fmt0.format(live));
+      setText('attemptCoverage', fmt1.format(attemptCoverage) + ' попытки на клиента · ' + fmt0.format(outboundMinutes) + ' мин/день осталось на исходящий поток');
+      setText('liveCoverage', fmt1.format(liveCoverage));
+      setText('requiredFte', fmt0.format(requiredFte));
+      setText('targetCopy', 'для ' + fmt1.format(target) + ' живого контакта на клиента');
+      setText('clientsPerFte', fmt0.format(queue / fte));
+      setText('kcCapacityRule', '≈' + fmt0.format(outboundMinutes * workDays / cycle * connect / target) + ' клиентов на ставку');
+
+      const gap = liveCoverage - target;
+      let stress;
+      if (gap >= .15) {
+        stress = '<b>Что это значит:</b> после резерва ' + fmt0.format(inboundMinutes) + ' минут на входящие остаётся ' + fmt0.format(outboundMinutes) + ' минут на исходящий поток. При выбранных параметрах есть запас, но его нельзя считать экономией до пилота.';
+      } else if (gap >= 0) {
+        stress = '<b>Что это значит:</b> входящие уже забирают ' + fmt0.format(inboundMinutes) + ' минут в день. Цель покрывается, но любой рост входящих, ручных операций или падение дозвона создаст очередь.';
+      } else {
+        stress = '<b>Что это значит:</b> после резерва времени на входящие выбранного числа ставок недостаточно. Нужны ещё ' + fmt0.format(requiredFte - fte) + ' ставки, меньше времени на попытку или более высокий дозвон.';
+      }
+      document.getElementById('stressText').innerHTML = stress;
+      updateEconomics();
+    }
+
+    function updateEconomics() {
+      const s3Portfolio = Number(els.s3Portfolio.value);
+      const seniorPortfolio = Number(els.seniorPortfolio.value);
+      const s3Fte = Math.ceil(s3WorkloadQueue / s3Portfolio);
+      const seniorFte = Math.ceil(seniorWorkloadQueue / seniorPortfolio);
+      const kcFte = requiredFteNow;
+      const requiredBauFte = kcFte + s3Fte + seniorFte;
+      const headroom = availableBauFte - requiredBauFte;
+      const maxKcFte = Math.max(0, availableBauFte - s3Fte - seniorFte);
+      const minutes = Number(els.minutes.value);
+      const inboundMinutes = Math.min(minutes, Number(els.inbound.value));
+      const outboundMinutes = Math.max(1, minutes - inboundMinutes);
+      const cycle = Number(els.cycle.value);
+      const connect = Number(els.connect.value) / 100;
+      const target = Number(els.target.value);
+      const livePerKcFte = outboundMinutes * workDays / cycle * connect;
+      const achievableCadence = maxKcFte * outboundMinutes * workDays / cycle * connect / queue;
+      const requiredCycle = maxKcFte > 0
+        ? maxKcFte * outboundMinutes * workDays * connect / (queue * target)
+        : 0;
+
+      setText('s3PortfolioOut', fmt0.format(s3Portfolio) + ' клиентов');
+      setText('seniorPortfolioOut', fmt0.format(seniorPortfolio) + ' клиентов');
+      setText('kcFteRole', fmt0.format(kcFte) + ' ставок');
+      setText('s3FteRole', fmt0.format(s3Fte) + ' ставок');
+      setText('seniorFteRole', fmt0.format(seniorFte) + ' ставок');
+      setText('productFteRole', fmt0.format(productFte) + ' ставки');
+      const intensity = Number(attackIntensity?.value || 1.25);
+      setText('s3CapacityRule', '1 ставка = ' + fmt0.format(s3Portfolio) + ' клиентов в защите; в атаке времени +' + fmt0.format((intensity - 1) * 100) + '%');
+      setText('seniorCapacityRule', '1 ставка = ' + fmt0.format(seniorPortfolio) + ' клиентов в защите; в атаке времени +' + fmt0.format((intensity - 1) * 100) + '%');
+      setText(
+        'headroomFte',
+        headroom > 0
+          ? fmt0.format(headroom) + (headroom === 1 ? ' ставка остаётся' : headroom < 5 ? ' ставки остаются' : ' ставок остаются')
+          : headroom === 0
+            ? 'Ровно 34 ставки — без запаса'
+            : 'Не хватает ' + fmt0.format(Math.abs(headroom)) + ' ставок'
+      );
+      setText(
+        'balanceFormula',
+        fmt0.format(availableBauFte) + ' доступно − ' + fmt0.format(kcFte) + ' КЦ − ' +
+        fmt0.format(s3Fte) + ' S3 − ' + fmt0.format(seniorFte) + ' KAM/RSM = ' +
+        (headroom > 0 ? '+' : '') + fmt0.format(headroom)
+      );
+      setText(
+        'headroomCopy',
+        fmt0.format(availableBauFte) + ' ставок доступно для текущей базы против ' +
+        fmt0.format(requiredBauFte) + ' ставок расчётной потребности. ' +
+        (headroom >= 2
+          ? 'Это возможный резерв, а не подтверждённая экономия: сначала проверяем нормы на пилоте.'
+          : headroom >= 0
+            ? 'Модель работает без запаса: любое отклонение создаст очередь.'
+            : 'Расчёт показывает дефицит мощности — сокращение в таком режиме нельзя защищать.')
+      );
+      setText(
+        'scenarioVerdict',
+        headroom >= 0
+          ? 'Текущая база помещается в доступную численность с запасом ' + fmt0.format(headroom) + ' ставок при выбранных параметрах.'
+          : 'При цели ' + fmt1.format(target) + ' живого контакта в месяц и выбранных нормах не хватает ' + fmt0.format(Math.abs(headroom)) + ' ставок. Сокращение требует изменить сам способ обслуживания.'
+      );
+      setText(
+        'scenarioRequirement',
+        'После персонального слоя на КЦ остаётся ' + fmt0.format(maxKcFte) +
+        ' ставок. После резерва ' + fmt0.format(inboundMinutes) + ' минут на входящие это ' + fmt1.format(achievableCadence) +
+        ' живого контакта на клиента в месяц; чтобы сохранить цель ' + fmt1.format(target) +
+        ', полный цикл должен быть не больше ' + fmt1.format(requiredCycle) +
+        ' минуты — либо нужен более высокий дозвон и обзвон низкого приоритета только по событию.'
+      );
+
+      [70000, 80000, 100000].forEach((threshold) => {
+        const scenario = summarizeRegions(regionData, threshold);
+        const scenarioRows = regionData.map((region) => summarizeOneRegion(region, threshold));
+        const scenarioS3Load = scenarioRows.reduce(
+          (sum, row) => sum + row.s3 * (row.region.attack ? intensity : 1),
+          0
+        );
+        const scenarioSeniorLoad = scenarioRows.reduce(
+          (sum, row) => sum + row.senior * (row.region.attack ? intensity : 1),
+          0
+        );
+        const scenarioKcFte = Math.ceil(
+          scenario.kc * target / connect * cycle / (outboundMinutes * workDays)
+        );
+        const scenarioS3Fte = Math.ceil(scenarioS3Load / s3Portfolio);
+        const scenarioSeniorFte = Math.ceil(scenarioSeniorLoad / seniorPortfolio);
+        const prefix = 'th' + threshold / 1000;
+        setText(prefix + 'Kc', fmt0.format(scenario.kc));
+        setText(prefix + 'Personal', fmt0.format(scenario.personal));
+        setText(prefix + 'Fte', fmt0.format(scenarioKcFte + scenarioS3Fte + scenarioSeniorFte));
+      });
+
+      const scenarioBody = document.getElementById('scenarioTableBody');
+      if (scenarioBody) {
+        scenarioBody.innerHTML = [0, 2, 4, 6].map((cut) => {
+          const totalFte = availableBauFte - cut;
+          const scenarioKcFte = Math.max(0, totalFte - s3Fte - seniorFte);
+          const cadence = queue ? scenarioKcFte * livePerKcFte / queue : 0;
+          const ratio = target ? cadence / target : 0;
+          const neededConnect = scenarioKcFte > 0
+            ? Math.min(1, queue * target * cycle / (scenarioKcFte * outboundMinutes * workDays))
+            : 1;
+          const neededCycle = scenarioKcFte > 0
+            ? scenarioKcFte * outboundMinutes * workDays * connect / (queue * target)
+            : 0;
+          let rule;
+          let riskClass;
+          let riskLabel;
+          if (ratio >= 1.1) {
+            rule = 'Цель контактов покрывается с запасом при выбранных параметрах.';
+            riskClass = 'low';
+            riskLabel = 'есть запас';
+          } else if (ratio >= 1) {
+            rule = 'Цель покрывается почти без запаса: ручные операции не должны расти.';
+            riskClass = 'medium';
+            riskLabel = 'на грани';
+          } else if (ratio >= .8) {
+            rule = 'Нужен дозвон не ниже ' + fmt0.format(neededConnect * 100) +
+              '% или полный цикл не длиннее ' + fmt1.format(neededCycle) + ' мин; иначе часть базы — только по событию.';
+            riskClass = 'high';
+            riskLabel = 'высокий';
+          } else {
+            rule = 'Ежемесячный контакт со всей базой не помещается. Нужны автоматический набор, более короткий цикл и звонки низкому приоритету только по событию.';
+            riskClass = 'high';
+            riskLabel = 'критичный';
+          }
+          const saving = cut * 323580 * 12;
+          return `<tr>
+            <td><strong>${cut ? 'Сократить ещё ' + cut : 'Оставить 34'}</strong><span>${cut ? totalFte + ' ставок на базу' : 'без дополнительного сокращения'}</span></td>
+            <td>${fmt0.format(totalFte)}</td>
+            <td>${fmt0.format(scenarioKcFte)} / ${fmt0.format(s3Fte)} / ${fmt0.format(seniorFte)}</td>
+            <td>${fmt1.format(cadence)}</td>
+            <td>${saving ? fmt1.format(saving / 1000000) + ' млн ₽' : '0 ₽'}</td>
+            <td>${rule}</td>
+            <td><span class="risk-pill ${riskClass}">${riskLabel}</span></td>
+          </tr>`;
+        }).join('');
+      }
+
+      const fteFor = (scenarioTarget, scenarioConnect, scenarioCycle) => Math.ceil(
+        queue * scenarioTarget / scenarioConnect * scenarioCycle / (outboundMinutes * workDays)
+      );
+      const lowerTarget = Math.max(.25, target * .75);
+      const betterConnect = Math.min(.70, connect + .10);
+      const fasterCycle = Math.max(4, cycle - 1.5);
+      const frequencyFte = fteFor(lowerTarget, connect, cycle);
+      const dialFte = fteFor(target, betterConnect, cycle);
+      const automationFte = fteFor(target, connect, fasterCycle);
+      const comboFte = fteFor(target, betterConnect, fasterCycle);
+      setText(
+        'frequencyIdea',
+        'Если цель снизить до ' + fmt1.format(lowerTarget) + ' контакта: ' +
+        fmt0.format(kcFte) + ' → ' + fmt0.format(frequencyFte) + ' ставок КЦ'
+      );
+      setText(
+        'dialIdea',
+        'Если дозвон вырастет до ' + fmt0.format(betterConnect * 100) + '%: ' +
+        fmt0.format(kcFte) + ' → ' + fmt0.format(dialFte) + ' ставок КЦ'
+      );
+      setText(
+        'automationIdea',
+        'Если цикл сократится до ' + fmt1.format(fasterCycle) + ' мин: ' +
+        fmt0.format(kcFte) + ' → ' + fmt0.format(automationFte) + ' ставок КЦ'
+      );
+      setText('comboIdeaTitle', fmt0.format(comboFte) + ' ставок КЦ при двух улучшениях');
+      setText(
+        'comboIdeaCopy',
+        'Считаем дозвон ' + fmt0.format(betterConnect * 100) + '% и цикл ' +
+        fmt1.format(fasterCycle) + ' мин при той же цели контактов.'
+      );
+      setText(
+        'comboIdea',
+        'Потребность КЦ: ' + fmt0.format(kcFte) + ' → ' + fmt0.format(comboFte) + ' ставок'
+      );
+    }
+
+    Object.values(els).filter(Boolean).forEach(el => el.addEventListener('input', updateCapacity));
+    initializeRegionalControls();
+    updateGlobalThreshold(Number(baseThreshold?.value || 80000));
+
+    const navLinks = [...document.querySelectorAll('.toc a')];
+    const sections = navLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries
+        .filter(entry => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + visible.target.id));
+    }, {rootMargin: '-18% 0px -68% 0px', threshold: [0, .1, .3]});
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>
